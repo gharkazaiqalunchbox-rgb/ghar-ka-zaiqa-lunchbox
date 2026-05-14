@@ -1,0 +1,1878 @@
+(() => {
+  const STORAGE_KEYS = {
+    menu: "gharMenu",
+    gallery: "gharGallery",
+    orders: "gharOrders",
+    cart: "gharCart",
+    adminToken: "gharAdminToken",
+    adminUser: "gharAdminUser",
+  };
+
+  const STATUS_OPTIONS = [
+    "Pending",
+    "Preparing",
+    "Ready to Go",
+    "On the Way",
+    "Delivered",
+    "Cancelled",
+  ];
+  const ORDER_STATUS_FLOW = [
+    "Pending",
+    "Preparing",
+    "Ready to Go",
+    "On the Way",
+    "Delivered",
+  ];
+
+  function getStatusOptionsForOrder(currentStatus) {
+    const currentIndex = ORDER_STATUS_FLOW.indexOf(currentStatus);
+    return currentIndex === -1
+      ? ORDER_STATUS_FLOW
+      : ORDER_STATUS_FLOW.filter((_, idx) => idx >= currentIndex);
+  }
+
+  // Backend URL Configuration
+  // For development: uses localhost:3000
+  // For production: Update this to your deployed backend URL (e.g., https://your-backend.render.com)
+  const BACKEND_URL =
+    window.location.protocol === "file:"
+      ? "http://localhost:3000"
+      : window.__CONFIG?.backendUrl || window.location.origin; // Update this line with your deployed backend URL
+
+  const API_BASE = BACKEND_URL;
+
+  let adminToken = null;
+  let adminUser = null;
+  let adminLoggedIn = false;
+  let adminLoginPending = null;
+  let adminVerifyResendIntervalId = null;
+
+  const defaultMenuItems = [
+    {
+      id: "starter-1",
+      category: "starters",
+      name: "Aloo Tikki",
+      description: "Crispy spiced potato cakes served with chutney.",
+      price: "PKR 295",
+      image: "assets/img/menu/menu-item-1.png",
+    },
+    {
+      id: "starter-2",
+      category: "starters",
+      name: "Vegetable Pakora",
+      description: "Golden fritters made from fresh vegetables and spices.",
+      price: "PKR 345",
+      image: "assets/img/menu/menu-item-2.png",
+    },
+    {
+      id: "starter-3",
+      category: "starters",
+      name: "Dahi Bhalla",
+      description:
+        "Soft lentil dumplings served with creamy yogurt and chutney.",
+      price: "PKR 375",
+      image: "assets/img/menu/menu-item-5.png",
+    },
+    {
+      id: "breakfast-1",
+      category: "breakfast",
+      name: "Paratha Roll",
+      description: "Warm stuffed paratha roll with fresh chutney.",
+      price: "PKR 395",
+      image: "assets/img/menu/menu-item-1.png",
+    },
+    {
+      id: "breakfast-2",
+      category: "breakfast",
+      name: "Egg Bhurji",
+      description: "Fluffy spiced scrambled eggs with soft bread.",
+      price: "PKR 450",
+      image: "assets/img/menu/menu-item-2.png",
+    },
+    {
+      id: "lunch-1",
+      category: "lunch",
+      name: "Chicken Curry",
+      description: "Home-style chicken curry served with rice or roti.",
+      price: "PKR 895",
+      image: "assets/img/menu/menu-item-1.png",
+    },
+    {
+      id: "lunch-2",
+      category: "lunch",
+      name: "Dal Makhni",
+      description: "Creamy lentils cooked with butter and spices.",
+      price: "PKR 825",
+      image: "assets/img/menu/menu-item-2.png",
+    },
+    {
+      id: "dinner-1",
+      category: "dinner",
+      name: "Chapli Kebab",
+      description: "Spiced beef kebab served with chutney and salad.",
+      price: "PKR 895",
+      image: "assets/img/menu/menu-item-1.png",
+    },
+    {
+      id: "dinner-2",
+      category: "dinner",
+      name: "Paneer Tikka",
+      description: "Marinated paneer grilled to perfection.",
+      price: "PKR 745",
+      image: "assets/img/menu/menu-item-2.png",
+    },
+  ];
+
+  const defaultGalleryItems = [
+    {
+      id: "gallery-1",
+      image: "assets/img/gallery/gallery-1.jpg",
+      alt: "Home cooked meal",
+    },
+    {
+      id: "gallery-2",
+      image: "assets/img/gallery/gallery-2.jpg",
+      alt: "Healthy lunchbox",
+    },
+    {
+      id: "gallery-3",
+      image: "assets/img/gallery/gallery-3.jpg",
+      alt: "Fresh dish",
+    },
+    {
+      id: "gallery-4",
+      image: "assets/img/gallery/gallery-4.jpg",
+      alt: "Delicious plate",
+    },
+    {
+      id: "gallery-5",
+      image: "assets/img/gallery/gallery-5.jpg",
+      alt: "Tasty meal",
+    },
+    {
+      id: "gallery-6",
+      image: "assets/img/gallery/gallery-6.jpg",
+      alt: "Crisp side dish",
+    },
+  ];
+
+  let menuItems = [];
+  let galleryItems = [];
+  let orders = [];
+  let cart = [];
+  let editingMenuId = null;
+  let editingGalleryId = null;
+
+  const dom = {
+    adminToggle: document.getElementById("admin-toggle"),
+    adminPanel: document.getElementById("admin-panel"),
+    adminClose: document.getElementById("admin-close"),
+    menuAdminList: document.getElementById("menu-admin-list"),
+    addMenuButton: document.getElementById("add-menu-item-btn"),
+    menuForm: document.getElementById("menu-item-form"),
+    menuName: document.getElementById("menu-name"),
+    menuCategory: document.getElementById("menu-category"),
+    menuPrice: document.getElementById("menu-price"),
+    menuImage: document.getElementById("menu-image"),
+    menuImageFile: document.getElementById("menu-image-file"),
+    menuImagePreview: document.getElementById("menu-image-preview"),
+    menuDescription: document.getElementById("menu-description"),
+    menuCancelBtn: document.getElementById("menu-cancel-btn"),
+    galleryAdminList: document.getElementById("gallery-admin-list"),
+    addGalleryButton: document.getElementById("add-gallery-image-btn"),
+    galleryForm: document.getElementById("gallery-item-form"),
+    galleryImageUrl: document.getElementById("gallery-image-url"),
+    galleryImageFile: document.getElementById("gallery-image-file"),
+    galleryImagePreview: document.getElementById("gallery-image-preview"),
+    galleryAltText: document.getElementById("gallery-alt-text"),
+    galleryCancelBtn: document.getElementById("gallery-cancel-btn"),
+    orderForm: document.getElementById("order-form"),
+    orderName: document.getElementById("order-name"),
+    orderEmail: document.getElementById("order-email"),
+    orderPhone: document.getElementById("order-phone"),
+    orderAddress: document.getElementById("order-address"),
+    orderNotes: document.getElementById("order-notes"),
+    orderMessage: document.getElementById("order-message"),
+    trackForm: document.getElementById("track-form"),
+    trackEmail: document.getElementById("track-email"),
+    trackOrderId: document.getElementById("track-order-id"),
+    trackResults: document.getElementById("track-results"),
+    cartItems: document.getElementById("cart-items"),
+    cartTotal: document.getElementById("cart-total"),
+    cartEmpty: document.getElementById("cart-empty"),
+    cartBadge: document.getElementById("cart-badge"),
+    cartTotal: document.getElementById("cart-total"),
+    cartEmpty: document.getElementById("cart-empty"),
+    adminOrdersList: document.getElementById("admin-orders-list"),
+    loginModal: document.getElementById("admin-login-modal"),
+    adminLoginForm: document.getElementById("admin-login-form"),
+    adminEmail: document.getElementById("admin-email"),
+    adminPassword: document.getElementById("admin-password"),
+    adminLoginMessage: document.getElementById("admin-login-message"),
+    adminLoginStepCredentials: document.getElementById(
+      "admin-login-step-credentials",
+    ),
+    adminLoginStepVerify: document.getElementById("admin-login-step-verify"),
+    adminLoginModalTitle: document.getElementById("admin-login-modal-title"),
+    adminLoginSubmit: document.getElementById("admin-login-submit"),
+    adminVerifyOtp: document.getElementById("admin-verify-otp"),
+    adminVerifyEmailMasked: document.getElementById(
+      "admin-verify-email-masked",
+    ),
+    adminVerifyMessage: document.getElementById("admin-verify-message"),
+    adminVerifySubmit: document.getElementById("admin-verify-submit"),
+    adminVerifyResendTimer: document.getElementById(
+      "admin-verify-resend-timer",
+    ),
+    adminVerifyResend: document.getElementById("admin-verify-resend"),
+    adminVerifyBack: document.getElementById("admin-verify-back"),
+    adminLogout: document.getElementById("admin-logout"),
+  };
+
+  function readStorage(key, fallback) {
+    const value = localStorage.getItem(key);
+    if (!value) return fallback;
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      return fallback;
+    }
+  }
+
+  function saveStorage(key, value) {
+    if (value === null || value === undefined) {
+      localStorage.removeItem(key);
+      return;
+    }
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+
+  function saveAdminSession(token, user) {
+    adminToken = token;
+    adminUser = user;
+    adminLoggedIn = true;
+    saveStorage(STORAGE_KEYS.adminToken, token);
+    saveStorage(STORAGE_KEYS.adminUser, user);
+  }
+
+  function clearAdminSession() {
+    adminToken = null;
+    adminUser = null;
+    adminLoggedIn = false;
+    saveStorage(STORAGE_KEYS.adminToken, null);
+    saveStorage(STORAGE_KEYS.adminUser, null);
+  }
+
+  function getAuthHeaders() {
+    return adminToken ? { Authorization: `Bearer ${adminToken}` } : {};
+  }
+
+  function formatPrice(value) {
+    return `PKR ${Number(value).toFixed(0)}`;
+  }
+
+  function parsePrice(priceStr) {
+    const numStr = String(priceStr).replace(/[^\d.]/g, "");
+    return parseFloat(numStr) || 0;
+  }
+
+  async function fetchFromApi(endpoint, options = {}) {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...(options.headers || {}),
+      },
+      ...options,
+    };
+
+    if (options.body && typeof options.body !== "string") {
+      config.body = JSON.stringify(options.body);
+    }
+
+    const response = await fetch(`${API_BASE}${endpoint}`, config);
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || response.statusText);
+    }
+
+    if (response.status === 204) {
+      return null;
+    }
+
+    return response.json();
+  }
+
+  async function fetchMenuFromServer() {
+    try {
+      const menu = await fetchFromApi("/api/menu");
+      menuItems = menu;
+      saveStorage(STORAGE_KEYS.menu, menuItems);
+    } catch (error) {
+      menuItems = readStorage(STORAGE_KEYS.menu, defaultMenuItems);
+    }
+  }
+
+  async function fetchGalleryFromServer() {
+    try {
+      const gallery = await fetchFromApi("/api/gallery");
+      galleryItems = gallery;
+      saveStorage(STORAGE_KEYS.gallery, galleryItems);
+    } catch (error) {
+      galleryItems = readStorage(STORAGE_KEYS.gallery, defaultGalleryItems);
+    }
+  }
+
+  async function fetchOrdersFromServer() {
+    if (!adminLoggedIn) {
+      orders = [];
+      return;
+    }
+
+    try {
+      const data = await fetchFromApi("/api/orders", {
+        headers: getAuthHeaders(),
+      });
+      orders = data.filter((order) => order.status !== "Cancelled");
+    } catch (error) {
+      clearAdminSession();
+      orders = [];
+      hideAdminPanel();
+    }
+  }
+
+  async function validateAdminSession() {
+    if (!adminLoggedIn) return;
+    await fetchOrdersFromServer();
+  }
+
+  function showLoginModal() {
+    if (!dom.loginModal || typeof bootstrap === "undefined") return;
+    const modal = bootstrap.Modal.getOrCreateInstance(dom.loginModal);
+    modal.show();
+  }
+
+  function hideLoginModal() {
+    if (!dom.loginModal || typeof bootstrap === "undefined") return;
+    const modal = bootstrap.Modal.getOrCreateInstance(dom.loginModal);
+    modal.hide();
+  }
+
+  function maskEmailForDisplay(email) {
+    const trim = email.trim();
+    const at = trim.indexOf("@");
+    if (at < 1) return trim;
+    const user = trim.slice(0, at);
+    const domain = trim.slice(at + 1);
+    if (user.length <= 2) return `${user[0]}***@${domain}`;
+    const stars = "*".repeat(Math.min(5, Math.max(1, user.length - 2)));
+    return `${user[0]}${stars}${user.slice(-1)}@${domain}`;
+  }
+
+  function formatResendCountdown(totalSeconds) {
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  }
+
+  function clearAdminVerifyResendTimer() {
+    if (adminVerifyResendIntervalId) {
+      clearInterval(adminVerifyResendIntervalId);
+      adminVerifyResendIntervalId = null;
+    }
+  }
+
+  function getAdminOtpCode() {
+    if (!dom.adminVerifyOtp) return "";
+    const inputs = dom.adminVerifyOtp.querySelectorAll(".admin-verify-digit");
+    return Array.from(inputs)
+      .map((el) => el.value.replace(/\D/g, "").slice(-1))
+      .join("");
+  }
+
+  function clearAdminOtpInputs() {
+    if (!dom.adminVerifyOtp) return;
+    dom.adminVerifyOtp.querySelectorAll(".admin-verify-digit").forEach((el) => {
+      el.value = "";
+    });
+  }
+
+  function showAdminLoginCredentialsStep() {
+    if (dom.adminLoginStepCredentials) {
+      dom.adminLoginStepCredentials.classList.remove("d-none");
+    }
+    if (dom.adminLoginStepVerify) {
+      dom.adminLoginStepVerify.classList.add("d-none");
+    }
+    if (dom.adminLoginModalTitle) {
+      dom.adminLoginModalTitle.textContent = "Admin Login";
+    }
+    clearAdminVerifyResendTimer();
+    adminLoginPending = null;
+    if (dom.adminVerifyResend) {
+      dom.adminVerifyResend.classList.add("d-none");
+    }
+    if (dom.adminVerifyResendTimer) {
+      dom.adminVerifyResendTimer.textContent = "";
+      dom.adminVerifyResendTimer.classList.remove("d-none");
+    }
+  }
+
+  function showAdminLoginVerifyStep(email) {
+    if (dom.adminLoginStepCredentials) {
+      dom.adminLoginStepCredentials.classList.add("d-none");
+    }
+    if (dom.adminLoginStepVerify) {
+      dom.adminLoginStepVerify.classList.remove("d-none");
+    }
+    if (dom.adminLoginModalTitle) {
+      dom.adminLoginModalTitle.textContent = "Verify code";
+    }
+    if (dom.adminVerifyEmailMasked) {
+      dom.adminVerifyEmailMasked.textContent = maskEmailForDisplay(email);
+    }
+    if (dom.adminVerifyMessage) {
+      dom.adminVerifyMessage.textContent = "";
+    }
+    clearAdminOtpInputs();
+    const firstDigit = dom.adminVerifyOtp?.querySelector(".admin-verify-digit");
+    if (firstDigit) {
+      setTimeout(() => firstDigit.focus(), 200);
+    }
+    startAdminVerifyResendCooldown(60);
+  }
+
+  function startAdminVerifyResendCooldown(seconds) {
+    clearAdminVerifyResendTimer();
+    if (!dom.adminVerifyResendTimer || !dom.adminVerifyResend) return;
+    dom.adminVerifyResend.classList.add("d-none");
+    dom.adminVerifyResendTimer.classList.remove("d-none");
+    let left = seconds;
+    const tick = () => {
+      if (left <= 0) {
+        clearAdminVerifyResendTimer();
+        if (dom.adminVerifyResendTimer) {
+          dom.adminVerifyResendTimer.classList.add("d-none");
+        }
+        if (dom.adminVerifyResend) {
+          dom.adminVerifyResend.classList.remove("d-none");
+        }
+        return;
+      }
+      if (dom.adminVerifyResendTimer) {
+        dom.adminVerifyResendTimer.textContent = `Resend code in ${formatResendCountdown(left)}`;
+      }
+      left -= 1;
+    };
+    tick();
+    adminVerifyResendIntervalId = setInterval(tick, 1000);
+  }
+
+  function resetAdminLoginModal() {
+    showAdminLoginCredentialsStep();
+    clearAdminOtpInputs();
+    if (dom.adminLoginMessage) {
+      dom.adminLoginMessage.textContent = "";
+    }
+    if (dom.adminVerifyMessage) {
+      dom.adminVerifyMessage.textContent = "";
+    }
+    if (dom.adminLoginSubmit) {
+      dom.adminLoginSubmit.disabled = false;
+      dom.adminLoginSubmit.textContent = "Sign In";
+    }
+    if (dom.adminVerifySubmit) {
+      dom.adminVerifySubmit.disabled = false;
+    }
+  }
+
+  function initAdminVerifyOtp() {
+    if (!dom.adminVerifyOtp) return;
+    const inputs = dom.adminVerifyOtp.querySelectorAll(".admin-verify-digit");
+    dom.adminVerifyOtp.addEventListener("paste", (e) => {
+      e.preventDefault();
+      const digits = (e.clipboardData?.getData("text") || "")
+        .replace(/\D/g, "")
+        .slice(0, 6);
+      inputs.forEach((input, i) => {
+        input.value = digits[i] || "";
+      });
+      const focusIdx = Math.min(Math.max(0, digits.length - 1), 5);
+      inputs[focusIdx]?.focus();
+    });
+    inputs.forEach((input, idx) => {
+      input.addEventListener("input", () => {
+        const v = input.value.replace(/\D/g, "");
+        input.value = v.slice(-1) || "";
+        if (input.value && idx < inputs.length - 1) {
+          inputs[idx + 1].focus();
+        }
+      });
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Backspace" && !input.value && idx > 0) {
+          inputs[idx - 1].focus();
+        }
+        if (e.key === "ArrowLeft" && idx > 0) {
+          inputs[idx - 1].focus();
+        }
+        if (e.key === "ArrowRight" && idx < inputs.length - 1) {
+          inputs[idx + 1].focus();
+        }
+        if (e.key === "Enter") {
+          e.preventDefault();
+          verifyAdminCode();
+        }
+      });
+    });
+  }
+
+  async function verifyAdminCode() {
+    if (!adminLoginPending || !dom.adminVerifySubmit) return;
+    const code = getAdminOtpCode();
+    if (code.length !== 6) {
+      if (dom.adminVerifyMessage) {
+        dom.adminVerifyMessage.textContent =
+          "Please enter all 6 digits of the verification code.";
+      }
+      return;
+    }
+    if (dom.adminVerifyMessage) {
+      dom.adminVerifyMessage.textContent = "";
+    }
+    dom.adminVerifySubmit.disabled = true;
+    const verifyLabel = dom.adminVerifySubmit.textContent;
+    dom.adminVerifySubmit.textContent = "Verifying…";
+    try {
+      const result = await fetchFromApi("/api/login/verify", {
+        method: "POST",
+        body: { email: adminLoginPending.email, code },
+      });
+      saveAdminSession(result.token, result.user);
+      clearAdminVerifyResendTimer();
+      adminLoginPending = null;
+      if (dom.adminLoginMessage) {
+        dom.adminLoginMessage.textContent = "";
+      }
+      hideLoginModal();
+      await fetchOrdersFromServer();
+      renderAdminOrders();
+      showAdminPanel();
+      showOrderMessage("Admin signed in successfully.");
+    } catch (error) {
+      if (dom.adminVerifyMessage) {
+        dom.adminVerifyMessage.textContent =
+          "Invalid or expired code. Check the email and try again, or resend a new code.";
+      }
+    } finally {
+      dom.adminVerifySubmit.disabled = false;
+      dom.adminVerifySubmit.textContent = verifyLabel;
+    }
+  }
+
+  async function resendAdminVerificationCode() {
+    if (!adminLoginPending) return;
+    const { email, password } = adminLoginPending;
+    if (dom.adminVerifyResend) {
+      dom.adminVerifyResend.disabled = true;
+    }
+    if (dom.adminVerifyMessage) {
+      dom.adminVerifyMessage.textContent = "";
+    }
+    try {
+      await fetchFromApi("/api/login", {
+        method: "POST",
+        body: { email, password },
+      });
+      clearAdminOtpInputs();
+      dom.adminVerifyOtp?.querySelector(".admin-verify-digit")?.focus();
+      startAdminVerifyResendCooldown(60);
+    } catch (error) {
+      if (dom.adminVerifyMessage) {
+        dom.adminVerifyMessage.textContent =
+          "Could not resend the code. Please try again in a moment.";
+      }
+    } finally {
+      if (dom.adminVerifyResend) {
+        dom.adminVerifyResend.disabled = false;
+      }
+    }
+  }
+
+  function adminVerifyBackClick() {
+    if (dom.adminPassword) {
+      dom.adminPassword.value = "";
+    }
+    if (dom.adminVerifyMessage) {
+      dom.adminVerifyMessage.textContent = "";
+    }
+    showAdminLoginCredentialsStep();
+  }
+
+  async function loginAdmin(event) {
+    event.preventDefault();
+    if (!dom.adminEmail || !dom.adminPassword) return;
+
+    const email = dom.adminEmail.value.trim();
+    const password = dom.adminPassword.value.trim();
+
+    if (!email || !password) {
+      if (dom.adminLoginMessage) {
+        dom.adminLoginMessage.textContent =
+          "Please enter both email and password.";
+      }
+      return;
+    }
+
+    if (dom.adminLoginMessage) {
+      dom.adminLoginMessage.textContent = "";
+    }
+
+    const submitBtn = dom.adminLoginSubmit;
+    const prevLabel = submitBtn ? submitBtn.textContent : "Sign In";
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Sending…";
+    }
+
+    try {
+      await fetchFromApi("/api/login", {
+        method: "POST",
+        body: { email, password },
+      });
+      adminLoginPending = { email, password };
+      showAdminLoginVerifyStep(email);
+    } catch (error) {
+      if (dom.adminLoginMessage) {
+        dom.adminLoginMessage.textContent =
+          "Sign-in failed. Check your email, password, and that the server can send mail.";
+      }
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = prevLabel;
+      }
+    }
+  }
+
+  function logoutAdmin() {
+    clearAdminSession();
+    hideAdminPanel();
+    showOrderMessage("You have been logged out of admin mode.");
+  }
+
+  function showImagePreview(fileInput, previewImg) {
+    const file = fileInput.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        previewImg.src = e.target.result;
+        previewImg.classList.remove("d-none");
+      };
+      reader.readAsDataURL(file);
+    } else {
+      previewImg.classList.add("d-none");
+    }
+  }
+
+  function resetMenuForm() {
+    dom.menuForm.classList.add("d-none");
+    dom.menuName.value = "";
+    dom.menuCategory.value = "starters";
+    dom.menuPrice.value = "";
+    dom.menuImage.value = "";
+    dom.menuImageFile.value = "";
+    dom.menuImagePreview.classList.add("d-none");
+    dom.menuDescription.value = "";
+    editingMenuId = null;
+  }
+
+  function resetGalleryForm() {
+    dom.galleryForm.classList.add("d-none");
+    dom.galleryImageUrl.value = "";
+    dom.galleryImageFile.value = "";
+    dom.galleryImagePreview.classList.add("d-none");
+    dom.galleryAltText.value = "";
+    editingGalleryId = null;
+  }
+
+  function loadState() {
+    menuItems = readStorage(STORAGE_KEYS.menu, defaultMenuItems);
+    galleryItems = readStorage(STORAGE_KEYS.gallery, defaultGalleryItems);
+    orders = readStorage(STORAGE_KEYS.orders, []);
+    cart = readStorage(STORAGE_KEYS.cart, []);
+    adminToken = readStorage(STORAGE_KEYS.adminToken, null);
+    adminUser = readStorage(STORAGE_KEYS.adminUser, null);
+    adminLoggedIn = !!adminToken;
+  }
+
+  function saveState() {
+    saveStorage(STORAGE_KEYS.menu, menuItems);
+    saveStorage(STORAGE_KEYS.gallery, galleryItems);
+    saveStorage(STORAGE_KEYS.cart, cart);
+  }
+
+  function findMenuItem(id) {
+    return menuItems.find((item) => item.id === id);
+  }
+
+  function renderMenu() {
+    ["starters", "breakfast", "lunch", "dinner"].forEach((category) => {
+      const row = document.getElementById(`menu-${category}-row`);
+      if (!row) return;
+      const list = menuItems.filter((item) => item.category === category);
+      if (!list.length) {
+        row.innerHTML = `<div class="col-12 text-center"><p class="text-muted">No items available in this category yet.</p></div>`;
+        return;
+      }
+      row.innerHTML = list
+        .map(
+          (item) => `
+          <div class="col-lg-4 menu-item">
+            <a href="${item.image}" class="glightbox" data-gallery="images-gallery">
+              <img src="${item.image}" class="menu-img img-fluid" alt="${item.name}" />
+            </a>
+            <h4>${item.name}</h4>
+            <p class="ingredients">${item.description}</p>
+            <p class="price">${item.price}</p>
+            <button type="button" class="btn btn-sm btn-outline-success add-to-cart-btn" data-id="${item.id}">Add to Cart</button>
+          </div>
+        `,
+        )
+        .join("");
+    });
+  }
+
+  function refreshLightbox() {
+    if (
+      window.galleryLightbox &&
+      typeof window.galleryLightbox.reload === "function"
+    ) {
+      window.galleryLightbox.reload();
+    } else {
+      window.galleryLightbox = GLightbox({ selector: ".glightbox" });
+    }
+  }
+
+  function refreshSwipers() {
+    if (window.swiperInstances && window.swiperInstances.length) {
+      window.swiperInstances.forEach((instance) => {
+        if (instance && typeof instance.update === "function") {
+          instance.update();
+        }
+      });
+    }
+  }
+
+  function renderGallery() {
+    const wrapper = document.getElementById("gallery-wrapper");
+    if (!wrapper) return;
+    wrapper.innerHTML = galleryItems.length
+      ? galleryItems
+          .map(
+            (item) => `
+            <div class="swiper-slide">
+              <a class="glightbox" data-gallery="images-gallery" href="${item.image}">
+                <img src="${item.image}" class="img-fluid" alt="${item.alt}" />
+              </a>
+            </div>
+          `,
+          )
+          .join("")
+      : `<div class="swiper-slide"><div class="text-center p-5">No gallery images added yet.</div></div>`;
+    refreshLightbox();
+    refreshSwipers();
+  }
+
+  function renderCart() {
+    if (!dom.cartItems || !dom.cartTotal || !dom.cartEmpty) return;
+    if (!cart.length) {
+      dom.cartItems.innerHTML = "";
+      dom.cartTotal.textContent = "PKR 0";
+      dom.cartEmpty.classList.remove("d-none");
+      return;
+    }
+
+    dom.cartEmpty.classList.add("d-none");
+    const items = cart.map((cartItem) => {
+      const menuItem = findMenuItem(cartItem.id) || {
+        name: "Unknown item",
+        price: "PKR 0",
+      };
+      return {
+        ...menuItem,
+        qty: cartItem.qty,
+      };
+    });
+
+    dom.cartItems.innerHTML = items
+      .map(
+        (item) => `
+          <li class="d-flex justify-content-between align-items-center mb-2">
+            <span>${item.qty} x ${item.name}</span>
+            <span class="d-flex gap-2 align-items-center">
+              ${item.price}
+              <button type="button" class="btn btn-sm btn-outline-danger cart-remove-btn" data-id="${item.id}">-</button>
+            </span>
+          </li>
+        `,
+      )
+      .join("");
+
+    const total = items.reduce(
+      (sum, item) => sum + parsePrice(item.price) * item.qty,
+      0,
+    );
+    dom.cartTotal.textContent = formatPrice(total);
+    updateCartBadge();
+    document.querySelectorAll(".cart-remove-btn").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        removeFromCart(event.target.dataset.id);
+      });
+    });
+  }
+
+  // Event delegation for cart buttons - prevents duplicate listeners
+  document.addEventListener("click", (event) => {
+    const addBtn = event.target.closest(".add-to-cart-btn");
+    if (addBtn) {
+      event.preventDefault();
+      addToCart(addBtn.dataset.id);
+      return;
+    }
+
+    const viewCartBtn = event.target.closest(".view-cart-btn");
+    if (viewCartBtn) {
+      event.preventDefault();
+      const cartModal = document.getElementById("cart-modal");
+      if (cartModal && window.bootstrap) {
+        bootstrap.Modal.getOrCreateInstance(cartModal).show();
+      }
+    }
+  });
+
+  function addToCart(itemId) {
+    const menuItem = findMenuItem(itemId);
+    if (!menuItem) return;
+
+    const existing = cart.find((item) => item.id === itemId);
+    if (existing) {
+      existing.qty += 1;
+    } else {
+      cart.push({ id: itemId, qty: 1 });
+    }
+    saveStorage(STORAGE_KEYS.cart, cart);
+    renderCart();
+
+    // Show toast notification
+    showOrderMessage(`✓ ${menuItem.name} added to cart!`, false, 3000);
+  }
+
+  function removeFromCart(itemId) {
+    const cartItem = cart.find((item) => item.id === itemId);
+    if (!cartItem) return;
+
+    // Decrease quantity, or remove if qty is 1
+    if (cartItem.qty > 1) {
+      cartItem.qty -= 1;
+    } else {
+      cart = cart.filter((item) => item.id !== itemId);
+    }
+    saveStorage(STORAGE_KEYS.cart, cart);
+    renderCart();
+  }
+
+  function updateCartBadge() {
+    if (!dom.cartBadge) return;
+    const count = cart.reduce((sum, item) => sum + item.qty, 0);
+    dom.cartBadge.textContent = count;
+  }
+
+  function requestAdminAccess() {
+    if (adminLoggedIn) {
+      showAdminPanel();
+      return;
+    }
+
+    showLoginModal();
+  }
+
+  function showAdminPanel() {
+    if (!dom.adminPanel || typeof bootstrap === "undefined") return;
+    const modal = bootstrap.Modal.getOrCreateInstance(dom.adminPanel);
+    modal.show();
+    loadAdminReviews();
+  }
+
+  function hideAdminPanel() {
+    if (!dom.adminPanel || typeof bootstrap === "undefined") return;
+    const modal = bootstrap.Modal.getOrCreateInstance(dom.adminPanel);
+    modal.hide();
+  }
+
+  function renderAdminMenu() {
+    if (!dom.menuAdminList) return;
+    if (!menuItems.length) {
+      dom.menuAdminList.innerHTML =
+        '<p class="text-muted">No menu items yet. Add one below.</p>';
+      return;
+    }
+
+    dom.menuAdminList.innerHTML = menuItems
+      .map(
+        (item) => `
+          <div class="admin-list-item">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+              <div>
+                <strong>${item.name}</strong>
+                <span class="text-muted">(${item.category})</span>
+                <p class="mb-1">${item.description}</p>
+                <p class="mb-0">${item.price}</p>
+              </div>
+              <div class="d-flex gap-2 flex-wrap">
+                <button type="button" class="admin-action-btn edit-menu-item-btn" data-id="${item.id}">Edit</button>
+                <button type="button" class="admin-action-btn" data-id="${item.id}" data-action="delete-menu">Delete</button>
+              </div>
+            </div>
+          </div>
+        `,
+      )
+      .join("");
+
+    document.querySelectorAll(".edit-menu-item-btn").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        const id = event.target.dataset.id;
+        openMenuForm(id);
+      });
+    });
+
+    document
+      .querySelectorAll('[data-action="delete-menu"]')
+      .forEach((button) => {
+        button.addEventListener("click", async (event) => {
+          const id = event.target.dataset.id;
+          try {
+            if (adminLoggedIn) {
+              await fetchFromApi(`/api/menu/${id}`, {
+                method: "DELETE",
+                headers: getAuthHeaders(),
+              });
+            }
+            menuItems = menuItems.filter((item) => item.id !== id);
+            saveStorage(STORAGE_KEYS.menu, menuItems);
+            renderMenu();
+            renderAdminMenu();
+          } catch (error) {
+            showOrderMessage(
+              "Unable to delete menu item. Please login again.",
+              true,
+            );
+          }
+        });
+      });
+  }
+
+  function openMenuForm(menuId = null) {
+    if (!dom.menuForm) return;
+    editingMenuId = menuId;
+    dom.menuForm.classList.remove("d-none");
+    if (menuId) {
+      const item = findMenuItem(menuId);
+      if (!item) return;
+      dom.menuName.value = item.name;
+      dom.menuCategory.value = item.category;
+      dom.menuPrice.value = item.price;
+      dom.menuImage.value = item.image;
+      dom.menuImageFile.value = "";
+      if (item.image) {
+        dom.menuImagePreview.src = item.image;
+        dom.menuImagePreview.classList.remove("d-none");
+      } else {
+        dom.menuImagePreview.classList.add("d-none");
+      }
+      dom.menuDescription.value = item.description;
+    } else {
+      dom.menuName.value = "";
+      dom.menuCategory.value = "starters";
+      dom.menuPrice.value = "";
+      dom.menuImage.value = "";
+      dom.menuImageFile.value = "";
+      dom.menuImagePreview.classList.add("d-none");
+      dom.menuDescription.value = "";
+    }
+    dom.menuName.focus();
+  }
+
+  async function saveMenuForm(event) {
+    event.preventDefault();
+    const name = dom.menuName.value.trim();
+    const category = dom.menuCategory.value;
+    const price = dom.menuPrice.value.trim();
+    const description = dom.menuDescription.value.trim();
+    const imageFile = dom.menuImageFile.files[0];
+    const imageUrl = dom.menuImage.value.trim();
+
+    if (!name || !price || !description) return;
+    if (!imageFile && !imageUrl) return;
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("category", category);
+    formData.append("price", price);
+    formData.append("description", description);
+    if (imageFile) {
+      formData.append("image", imageFile);
+    } else {
+      formData.append("image", imageUrl);
+    }
+
+    try {
+      if (editingMenuId && adminLoggedIn) {
+        const response = await fetch(`${API_BASE}/api/menu/${editingMenuId}`, {
+          method: "PUT",
+          headers: getAuthHeaders(),
+          body: formData,
+        });
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+        const updated = await response.json();
+        menuItems = menuItems.map((item) =>
+          item.id === editingMenuId ? updated : item,
+        );
+      } else if (!editingMenuId && adminLoggedIn) {
+        const response = await fetch(`${API_BASE}/api/menu`, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: formData,
+        });
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+        const created = await response.json();
+        menuItems.unshift(created);
+      } else {
+        // Fallback for local storage
+        const newItem = {
+          id: `menu-${Date.now()}`,
+          category,
+          name,
+          description,
+          price,
+          image: imageFile ? URL.createObjectURL(imageFile) : imageUrl,
+        };
+        if (editingMenuId) {
+          menuItems = menuItems.map((item) =>
+            item.id === editingMenuId ? { ...item, ...newItem } : item,
+          );
+        } else {
+          menuItems.unshift(newItem);
+        }
+      }
+
+      saveStorage(STORAGE_KEYS.menu, menuItems);
+      renderMenu();
+      renderAdminMenu();
+      resetMenuForm();
+    } catch (error) {
+      console.error("Error saving menu item:", error);
+      showOrderMessage(
+        "Unable to save menu item. Please login again or check your connection.",
+        true,
+      );
+    }
+  }
+
+  function renderAdminGallery() {
+    if (!dom.galleryAdminList) return;
+    if (!galleryItems.length) {
+      dom.galleryAdminList.innerHTML =
+        '<p class="text-muted">No gallery images yet. Add one below.</p>';
+      return;
+    }
+
+    dom.galleryAdminList.innerHTML = galleryItems
+      .map(
+        (item) => `
+          <div class="admin-list-item">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+              <div>
+                <strong>${item.alt}</strong>
+                <p class="mb-1">${item.image}</p>
+              </div>
+              <div class="d-flex gap-2 flex-wrap">
+                <button type="button" class="admin-action-btn edit-gallery-item-btn" data-id="${item.id}">Edit</button>
+                <button type="button" class="admin-action-btn" data-id="${item.id}" data-action="delete-gallery">Delete</button>
+              </div>
+            </div>
+          </div>
+        `,
+      )
+      .join("");
+
+    document.querySelectorAll(".edit-gallery-item-btn").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        openGalleryForm(event.target.dataset.id);
+      });
+    });
+
+    document
+      .querySelectorAll('[data-action="delete-gallery"]')
+      .forEach((button) => {
+        button.addEventListener("click", async (event) => {
+          const id = event.target.dataset.id;
+          try {
+            if (adminLoggedIn) {
+              await fetchFromApi(`/api/gallery/${id}`, {
+                method: "DELETE",
+                headers: getAuthHeaders(),
+              });
+            }
+            galleryItems = galleryItems.filter((item) => item.id !== id);
+            saveStorage(STORAGE_KEYS.gallery, galleryItems);
+            renderGallery();
+            renderAdminGallery();
+          } catch (error) {
+            showOrderMessage(
+              "Unable to delete gallery image. Please login again.",
+              true,
+            );
+          }
+        });
+      });
+  }
+
+  function openGalleryForm(galleryId = null) {
+    if (!dom.galleryForm) return;
+    editingGalleryId = galleryId;
+    dom.galleryForm.classList.remove("d-none");
+    if (galleryId) {
+      const item = galleryItems.find((g) => g.id === galleryId);
+      if (!item) return;
+      dom.galleryImageUrl.value = item.image;
+      dom.galleryImageFile.value = "";
+      if (item.image) {
+        dom.galleryImagePreview.src = item.image;
+        dom.galleryImagePreview.classList.remove("d-none");
+      } else {
+        dom.galleryImagePreview.classList.add("d-none");
+      }
+      dom.galleryAltText.value = item.alt;
+    } else {
+      dom.galleryImageUrl.value = "";
+      dom.galleryImageFile.value = "";
+      dom.galleryImagePreview.classList.add("d-none");
+      dom.galleryAltText.value = "";
+    }
+    dom.galleryAltText.focus();
+  }
+
+  async function saveGalleryForm(event) {
+    event.preventDefault();
+    const imageFile = dom.galleryImageFile.files[0];
+    const imageUrl = dom.galleryImageUrl.value.trim();
+    const alt = dom.galleryAltText.value.trim();
+
+    if (!alt) return;
+    if (!imageFile && !imageUrl) return;
+
+    const formData = new FormData();
+    formData.append("alt", alt);
+    if (imageFile) {
+      formData.append("image", imageFile);
+    } else {
+      formData.append("image", imageUrl);
+    }
+
+    try {
+      if (editingGalleryId && adminLoggedIn) {
+        const response = await fetch(
+          `${API_BASE}/api/gallery/${editingGalleryId}`,
+          {
+            method: "PUT",
+            headers: getAuthHeaders(),
+            body: formData,
+          },
+        );
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+        const updated = await response.json();
+        galleryItems = galleryItems.map((item) =>
+          item.id === editingGalleryId ? updated : item,
+        );
+      } else if (!editingGalleryId && adminLoggedIn) {
+        const response = await fetch(`${API_BASE}/api/gallery`, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: formData,
+        });
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+        const created = await response.json();
+        galleryItems.unshift(created);
+      } else {
+        // Fallback for local storage
+        const newItem = {
+          id: `gallery-${Date.now()}`,
+          image: imageFile ? URL.createObjectURL(imageFile) : imageUrl,
+          alt,
+        };
+        if (editingGalleryId) {
+          galleryItems = galleryItems.map((item) =>
+            item.id === editingGalleryId ? { ...item, ...newItem } : item,
+          );
+        } else {
+          galleryItems.unshift(newItem);
+        }
+      }
+
+      saveStorage(STORAGE_KEYS.gallery, galleryItems);
+      renderGallery();
+      renderAdminGallery();
+      resetGalleryForm();
+    } catch (error) {
+      console.error("Error saving gallery item:", error);
+      showOrderMessage(
+        "Unable to save gallery image. Please login again or check your connection.",
+        true,
+      );
+    }
+  }
+
+  function renderAdminOrders() {
+    if (!dom.adminOrdersList) return;
+    if (!orders.length) {
+      dom.adminOrdersList.innerHTML =
+        '<p class="text-muted">No orders have been placed yet.</p>';
+      return;
+    }
+
+    dom.adminOrdersList.innerHTML = orders
+      .map(
+        (order) => `
+        <div class="admin-list-item">
+          <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+            <div>
+              <strong>Order ${order.id}</strong>
+              <p class="mb-1">${order.customerName} • ${order.email}</p>
+              <p class="mb-1"><strong>Phone:</strong> ${order.phone}</p>
+              <p class="mb-1">${order.address}</p>
+              <p class="mb-1">${order.items
+                .map((item) => `${item.qty} x ${item.name}`)
+                .join(", ")}</p>
+              <p class="mb-0">Total: ${order.total}</p>
+            </div>
+            <div>
+              <label class="form-label">Status</label>
+              <select class="form-select order-status-select" data-id="${order.id}">
+                ${getStatusOptionsForOrder(order.status)
+                  .map(
+                    (status) =>
+                      `<option value="${status}" ${order.status === status ? "selected" : ""}>${status}</option>`,
+                  )
+                  .join("")}
+              </select>
+            </div>
+          </div>
+        </div>
+      `,
+      )
+      .join("");
+
+    document.querySelectorAll(".order-status-select").forEach((select) => {
+      select.addEventListener("change", (event) => {
+        updateOrderStatus(event.target.dataset.id, event.target.value);
+      });
+    });
+  }
+
+  async function updateOrderStatus(orderId, status) {
+    try {
+      if (adminLoggedIn) {
+        const updated = await fetchFromApi(`/api/orders/${orderId}/status`, {
+          method: "PUT",
+          headers: getAuthHeaders(),
+          body: { status },
+        });
+        orders = orders
+          .map((order) => (order.id === orderId ? updated : order))
+          .filter((order) => order.status !== "Cancelled");
+      } else {
+        orders = orders.map((order) =>
+          order.id === orderId ? { ...order, status } : order,
+        );
+      }
+      saveStorage(STORAGE_KEYS.orders, orders);
+      renderAdminOrders();
+    } catch (error) {
+      showOrderMessage(
+        "Unable to update order status. Please login again.",
+        true,
+      );
+    }
+  }
+
+  function showOrderMessage(message, isError = false, duration = 5000) {
+    if (!dom.orderMessage) return;
+    dom.orderMessage.classList.remove("d-none");
+    dom.orderMessage.textContent = message;
+    dom.orderMessage.style.color = isError ? "#d9534f" : "#ffffff";
+    dom.orderMessage.style.background = isError ? "#f8d7da" : "#2f7d36";
+    dom.orderMessage.style.padding = "12px 16px";
+    dom.orderMessage.style.borderRadius = "10px";
+    setTimeout(() => {
+      dom.orderMessage.classList.add("d-none");
+    }, duration);
+  }
+
+  // Admin Review Management
+  async function loadAdminReviews() {
+    if (!adminLoggedIn) return;
+    try {
+      const reviews = await fetchFromApi("/api/admin/reviews", {
+        headers: getAuthHeaders(),
+      });
+      renderAdminReviews(reviews);
+    } catch (error) {
+      console.error("Error loading admin reviews:", error);
+    }
+  }
+
+  function renderAdminReviews(reviews) {
+    const reviewsList = document.getElementById("admin-reviews-list");
+    if (!reviewsList) return;
+
+    if (!reviews.length) {
+      reviewsList.innerHTML = '<p class="text-muted">No reviews yet.</p>';
+      return;
+    }
+
+    reviewsList.innerHTML = reviews
+      .map(
+        (review) => `
+        <div class="admin-list-item" style="border-left: 4px solid ${review.approved ? "#28a745" : "#ffc107"}">
+          <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+            <div>
+              <strong>${review.customerName}</strong>
+              <p class="mb-1"><small>${review.customerEmail}</small></p>
+              <p class="mb-2">"${review.reviewText}"</p>
+              <p class="mb-1">
+                <span style="color: #ffc107;">
+                  ${"⭐".repeat(review.rating)}
+                </span>
+              </p>
+              <p class="mb-0"><small>Status: ${review.approved ? '<span class="badge bg-success">Approved</span>' : '<span class="badge bg-warning">Pending</span>'}</small></p>
+            </div>
+            <div class="d-flex flex-column gap-2">
+              ${
+                !review.approved
+                  ? `
+                <button class="btn btn-sm btn-success approve-review-btn" data-id="${review.id}">
+                  Approve
+                </button>
+              `
+                  : ""
+              }
+              <button class="btn btn-sm btn-danger reject-review-btn" data-id="${review.id}">
+                ${review.approved ? "Unapprove" : "Reject"}
+              </button>
+              <button class="btn btn-sm btn-outline-danger delete-review-btn" data-id="${review.id}">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      `,
+      )
+      .join("");
+
+    // Add event listeners
+    document.querySelectorAll(".approve-review-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        approveReview(e.target.dataset.id);
+      });
+    });
+
+    document.querySelectorAll(".reject-review-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        rejectReview(e.target.dataset.id);
+      });
+    });
+
+    document.querySelectorAll(".delete-review-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        deleteReview(e.target.dataset.id);
+      });
+    });
+  }
+
+  async function approveReview(reviewId) {
+    try {
+      await fetchFromApi(`/api/admin/reviews/${reviewId}/approve`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+      });
+      loadAdminReviews();
+      loadApprovedReviews();
+      showOrderMessage("Review approved!");
+    } catch (error) {
+      showOrderMessage("Unable to approve review.", true);
+    }
+  }
+
+  async function rejectReview(reviewId) {
+    try {
+      await fetchFromApi(`/api/admin/reviews/${reviewId}/reject`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+      });
+      loadAdminReviews();
+      loadApprovedReviews();
+      showOrderMessage("Review status updated.");
+    } catch (error) {
+      showOrderMessage("Unable to update review.", true);
+    }
+  }
+
+  async function deleteReview(reviewId) {
+    if (!confirm("Are you sure you want to delete this review?")) return;
+    try {
+      await fetchFromApi(`/api/admin/reviews/${reviewId}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
+      loadAdminReviews();
+      loadApprovedReviews();
+      showOrderMessage("Review deleted.");
+    } catch (error) {
+      showOrderMessage("Unable to delete review.", true);
+    }
+  }
+
+  async function placeOrder(event) {
+    event.preventDefault();
+    if (!cart.length) {
+      showOrderMessage(
+        "Your cart is empty. Please add items from the menu.",
+        true,
+      );
+      return;
+    }
+
+    const name = dom.orderName.value.trim();
+    const email = dom.orderEmail.value.trim();
+    const phone = dom.orderPhone.value.trim();
+    const address = dom.orderAddress.value.trim();
+    const notes = dom.orderNotes.value.trim();
+
+    if (!name || !email || !phone || !address) {
+      showOrderMessage("Please fill in all required order details.", true);
+      return;
+    }
+
+    const orderItems = cart.map((cartItem) => {
+      const menuItem = findMenuItem(cartItem.id) || {
+        name: "Unknown",
+        price: "PKR 0",
+      };
+      return {
+        id: cartItem.id,
+        name: menuItem.name,
+        price: menuItem.price,
+        qty: cartItem.qty,
+      };
+    });
+
+    const total = formatPrice(
+      orderItems.reduce(
+        (sum, item) => sum + parsePrice(item.price) * item.qty,
+        0,
+      ),
+    );
+
+    try {
+      const confirmedOrder = await fetchFromApi("/api/orders", {
+        method: "POST",
+        body: {
+          customerName: name,
+          email,
+          phone,
+          address,
+          notes,
+          items: orderItems,
+          total,
+        },
+      });
+
+      cart = [];
+      saveState();
+      renderCart();
+      dom.orderForm.reset();
+      showOrderMessage(
+        `Order placed successfully! Your order ID is ${confirmedOrder.id}. A confirmation email has been sent to ${email}.`,
+      );
+    } catch (error) {
+      showOrderMessage("Unable to place order. Please try again later.", true);
+    }
+  }
+
+  // Gravatar helper to get profile picture from Gmail
+  function getGravatarUrl(email, size = 80) {
+    const md5 = function (str) {
+      return CryptoJS.MD5(str).toString();
+    };
+    const hash = md5(email.toLowerCase().trim());
+    return `https://www.gravatar.com/avatar/${hash}?s=${size}&d=identicon`;
+  }
+
+  // Review form submission
+  async function submitReview(event) {
+    event.preventDefault();
+    const name = document.getElementById("review-name").value.trim();
+    const email = document.getElementById("review-email").value.trim();
+    const reviewText = document.getElementById("review-text").value.trim();
+    const rating = parseInt(document.getElementById("review-rating").value);
+
+    if (!name || !email || !reviewText || rating === 0) {
+      showReviewMessage("Please fill in all fields and select a rating.", true);
+      return;
+    }
+
+    try {
+      const response = await fetchFromApi("/api/reviews", {
+        method: "POST",
+        body: {
+          customerName: name,
+          customerEmail: email,
+          reviewText,
+          rating,
+        },
+      });
+
+      document.getElementById("review-form").reset();
+      document.getElementById("review-rating").value = 0;
+      document.querySelectorAll(".star-rating i").forEach((star) => {
+        star.classList.remove("active", "bi-star-fill");
+        star.classList.add("bi-star");
+      });
+      showReviewMessage(
+        "Thank you! Your review has been submitted and is awaiting approval.",
+        false,
+      );
+    } catch (error) {
+      showReviewMessage(
+        "Unable to submit review. Please try again later.",
+        true,
+      );
+    }
+  }
+
+  function showReviewMessage(message, isError = false) {
+    const messageEl = document.getElementById("review-message");
+    if (!messageEl) return;
+    messageEl.textContent = message;
+    messageEl.className = `review-message ${isError ? "error" : "success"}`;
+    messageEl.style.display = "block";
+    setTimeout(() => {
+      messageEl.style.display = "none";
+    }, 5000);
+  }
+
+  // Load and display approved reviews
+  async function loadApprovedReviews() {
+    try {
+      const reviews = await fetchFromApi("/api/reviews");
+      renderApprovedReviews(reviews);
+    } catch (error) {
+      console.error("Error loading reviews:", error);
+    }
+  }
+
+  function renderApprovedReviews(reviews) {
+    const swiperWrapper = document.querySelector(
+      "#testimonials-swiper-wrapper",
+    );
+    const testimonialsSection = document.querySelector("#testimonials");
+
+    if (!swiperWrapper) return;
+
+    // If no approved reviews, hide the testimonials section
+    if (reviews.length === 0) {
+      if (testimonialsSection) {
+        testimonialsSection.style.display = "none";
+      }
+      return;
+    }
+
+    // Show the testimonials section
+    if (testimonialsSection) {
+      testimonialsSection.style.display = "block";
+    }
+
+    // Clear existing slides
+    swiperWrapper.innerHTML = "";
+
+    // Add reviewed testimonials from database
+    reviews.forEach((review) => {
+      const slide = document.createElement("div");
+      slide.className = "swiper-slide";
+
+      const gravatarUrl = getGravatarUrl(review.customerEmail);
+
+      slide.innerHTML = `
+        <div class="testimonial-item">
+          <div class="row gy-4 justify-content-center">
+            <div class="col-lg-6">
+              <div class="testimonial-content">
+                <p>
+                  <i class="bi bi-quote quote-icon-left"></i>
+                  <span>${review.reviewText}</span>
+                  <i class="bi bi-quote quote-icon-right"></i>
+                </p>
+                <h3>${review.customerName}</h3>
+                <h4>${review.customerEmail}</h4>
+                <div class="stars">
+                  ${Array(review.rating).fill('<i class="bi bi-star-fill"></i>').join("")}
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-2 text-center">
+              <img
+                src="${gravatarUrl}"
+                class="img-fluid testimonial-img"
+                alt="${review.customerName}"
+                loading="lazy"
+              />
+            </div>
+          </div>
+        </div>
+      `;
+
+      swiperWrapper.appendChild(slide);
+    });
+
+    // Find and update the testimonials Swiper instance
+    const testimonialsSwiper = document.querySelector(".swiper-wrapper");
+    if (window.swiperInstances && window.swiperInstances.length) {
+      // Find the swiper instance that owns the testimonials wrapper
+      const testimonialsSwiperInstance = window.swiperInstances.find(
+        (instance) => {
+          return instance.wrapperEl === swiperWrapper;
+        },
+      );
+
+      if (testimonialsSwiperInstance) {
+        testimonialsSwiperInstance.update();
+        testimonialsSwiperInstance.slideTo(0, 0, false);
+        if (testimonialsSwiperInstance.autoplay) {
+          testimonialsSwiperInstance.autoplay.start();
+        }
+      }
+    }
+  }
+
+  function renderTrackResults(foundOrders) {
+    if (!dom.trackResults) return;
+    if (!foundOrders.length) {
+      dom.trackResults.innerHTML =
+        '<p class="text-muted">No matching orders found. Verify your email and order ID.</p>';
+      return;
+    }
+
+    dom.trackResults.innerHTML = foundOrders
+      .map(
+        (order) => `
+        <div class="order-card p-3 mb-3">
+          <h5>Order ${order.id}</h5>
+          <p><strong>Status:</strong> <span class="order-status-badge">${order.status}</span></p>
+          <p><strong>Customer:</strong> ${order.customerName}</p>
+          <p><strong>Items:</strong> ${order.items.map((item) => `${item.qty} x ${item.name}`).join(", ")}</p>
+          <p><strong>Total:</strong> ${order.total}</p>
+          <p><strong>Delivery:</strong> ${order.address}</p>
+          ${order.status === "Pending" ? `<button type="button" class="btn btn-sm btn-danger cancel-order-btn" data-order-id="${order.id}">Cancel Pending Order</button>` : ""}
+        </div>
+      `,
+      )
+      .join("");
+
+    document.querySelectorAll(".cancel-order-btn").forEach((button) => {
+      button.addEventListener("click", async (event) => {
+        const orderId = event.target.dataset.orderId;
+        await cancelTrackedOrder(orderId);
+      });
+    });
+  }
+
+  async function trackOrders(event) {
+    event.preventDefault();
+    const email = dom.trackEmail.value.trim().toLowerCase();
+    const orderId = dom.trackOrderId.value.trim();
+    if (!email) {
+      renderTrackResults([]);
+      return;
+    }
+
+    try {
+      const query = new URLSearchParams({
+        email,
+        ...(orderId ? { orderId } : {}),
+      }).toString();
+      const data = await fetchFromApi(`/api/orders/track?${query}`);
+      renderTrackResults(data);
+    } catch (error) {
+      showOrderMessage(
+        "Unable to find order. Check your details and try again.",
+        true,
+      );
+    }
+  }
+
+  async function cancelTrackedOrder(orderId) {
+    const email = dom.trackEmail.value.trim().toLowerCase();
+    if (!email) {
+      showOrderMessage(
+        "Enter the email used for this order to cancel it.",
+        true,
+      );
+      return;
+    }
+
+    try {
+      const canceledOrder = await fetchFromApi(
+        `/api/orders/${orderId}/cancel`,
+        {
+          method: "PUT",
+          body: { email },
+        },
+      );
+      renderTrackResults([canceledOrder]);
+      showOrderMessage("Order cancelled successfully.");
+    } catch (error) {
+      showOrderMessage(
+        "Unable to cancel order. Only pending orders can be cancelled.",
+        true,
+      );
+    }
+  }
+
+  async function init() {
+    loadState();
+    await Promise.all([fetchMenuFromServer(), fetchGalleryFromServer()]);
+    await validateAdminSession();
+
+    renderMenu();
+    renderGallery();
+    renderCart();
+    renderAdminMenu();
+    renderAdminGallery();
+    renderAdminOrders();
+    loadApprovedReviews();
+
+    if (dom.adminToggle) {
+      dom.adminToggle.addEventListener("click", requestAdminAccess);
+    }
+    if (dom.adminClose) {
+      dom.adminClose.addEventListener("click", hideAdminPanel);
+    }
+    if (dom.addMenuButton) {
+      dom.addMenuButton.addEventListener("click", () => openMenuForm());
+    }
+    if (dom.menuForm) {
+      dom.menuForm.addEventListener("submit", saveMenuForm);
+    }
+    if (dom.addGalleryButton) {
+      dom.addGalleryButton.addEventListener("click", () => openGalleryForm());
+    }
+    if (dom.galleryForm) {
+      dom.galleryForm.addEventListener("submit", saveGalleryForm);
+    }
+    if (dom.orderForm) {
+      dom.orderForm.addEventListener("submit", placeOrder);
+    }
+    if (dom.trackForm) {
+      dom.trackForm.addEventListener("submit", trackOrders);
+    }
+
+    // Review form listeners
+    const reviewForm = document.getElementById("review-form");
+    if (reviewForm) {
+      reviewForm.addEventListener("submit", submitReview);
+    }
+
+    // Star rating listeners
+    const starRating = document.getElementById("review-stars");
+    if (starRating) {
+      const updateStars = (activeCount) => {
+        starRating.querySelectorAll("i").forEach((s, index) => {
+          const isActive = index < activeCount;
+          s.classList.toggle("bi-star-fill", isActive);
+          s.classList.toggle("bi-star", !isActive);
+          s.classList.toggle("active", isActive);
+        });
+      };
+
+      starRating.querySelectorAll("i").forEach((star) => {
+        star.addEventListener("click", (e) => {
+          const rating = parseInt(e.target.dataset.rating, 10);
+          document.getElementById("review-rating").value = rating;
+          updateStars(rating);
+        });
+        star.addEventListener("mouseover", (e) => {
+          const rating = parseInt(e.target.dataset.rating, 10);
+          updateStars(rating);
+        });
+      });
+
+      starRating.addEventListener("mouseout", () => {
+        const currentRating = parseInt(
+          document.getElementById("review-rating").value,
+          10,
+        );
+        updateStars(currentRating);
+      });
+    }
+
+    if (dom.adminLoginForm) {
+      dom.adminLoginForm.addEventListener("submit", loginAdmin);
+    }
+    initAdminVerifyOtp();
+    if (dom.adminVerifySubmit) {
+      dom.adminVerifySubmit.addEventListener("click", () => {
+        verifyAdminCode();
+      });
+    }
+    if (dom.adminVerifyResend) {
+      dom.adminVerifyResend.addEventListener("click", () => {
+        resendAdminVerificationCode();
+      });
+    }
+    if (dom.adminVerifyBack) {
+      dom.adminVerifyBack.addEventListener("click", adminVerifyBackClick);
+    }
+    if (dom.loginModal) {
+      dom.loginModal.addEventListener("hidden.bs.modal", resetAdminLoginModal);
+    }
+    if (dom.adminLogout) {
+      dom.adminLogout.addEventListener("click", logoutAdmin);
+    }
+    if (dom.menuImageFile) {
+      dom.menuImageFile.addEventListener("change", () =>
+        showImagePreview(dom.menuImageFile, dom.menuImagePreview),
+      );
+    }
+    if (dom.menuCancelBtn) {
+      dom.menuCancelBtn.addEventListener("click", resetMenuForm);
+    }
+    if (dom.galleryImageFile) {
+      dom.galleryImageFile.addEventListener("change", () =>
+        showImagePreview(dom.galleryImageFile, dom.galleryImagePreview),
+      );
+    }
+    if (dom.galleryCancelBtn) {
+      dom.galleryCancelBtn.addEventListener("click", resetGalleryForm);
+    }
+  }
+
+  window.addEventListener("load", init);
+})();

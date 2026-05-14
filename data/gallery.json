@@ -1,0 +1,32 @@
+[
+  {
+    "id": "gallery-1",
+    "image": "assets/img/gallery/gallery-1778581724288-Beef Nihari.jpeg",
+    "alt": "Beef Nihari"
+  },
+  {
+    "id": "gallery-2",
+    "image": "assets/img/gallery/gallery-1778581825031-BBQ Chiken.jpeg",
+    "alt": "BBQ Chicken"
+  },
+  {
+    "id": "gallery-3",
+    "image": "assets/img/gallery/gallery-1778581999241-Makhni Channy.jpeg",
+    "alt": "Makhni Channy"
+  },
+  {
+    "id": "gallery-4",
+    "image": "assets/img/gallery/gallery-4.jpg",
+    "alt": "Delicious plate"
+  },
+  {
+    "id": "gallery-5",
+    "image": "assets/img/gallery/gallery-5.jpg",
+    "alt": "Tasty meal"
+  },
+  {
+    "id": "gallery-6",
+    "image": "assets/img/gallery/gallery-1778581515670-Egg-fried Rice and Chicken Manchurian.jpeg",
+    "alt": "Egg-fried Rice and Manchurian"
+  }
+]
