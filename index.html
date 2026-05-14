@@ -452,9 +452,9 @@
               <a
                 class="nav-link active show"
                 data-bs-toggle="tab"
-                data-bs-target="#menu-starters"
+                data-bs-target="#menu-full-meal"
               >
-                <h4>Starters</h4>
+                <h4>Full Meal</h4>
               </a>
             </li>
             <!-- End tab nav item -->
@@ -463,9 +463,9 @@
               <a
                 class="nav-link"
                 data-bs-toggle="tab"
-                data-bs-target="#menu-breakfast"
+                data-bs-target="#menu-individual-items"
               >
-                <h4>Breakfast</h4>
+                <h4>Individual Items</h4>
               </a>
             </li>
             <!-- End tab nav item -->
@@ -474,59 +474,39 @@
               <a
                 class="nav-link"
                 data-bs-toggle="tab"
-                data-bs-target="#menu-lunch"
+                data-bs-target="#menu-add-ons"
               >
-                <h4>Lunch</h4>
-              </a>
-            </li>
-            <!-- End tab nav item -->
-
-            <li class="nav-item">
-              <a
-                class="nav-link"
-                data-bs-toggle="tab"
-                data-bs-target="#menu-dinner"
-              >
-                <h4>Dinner</h4>
+                <h4>Add-Ons</h4>
               </a>
             </li>
             <!-- End tab nav item -->
           </ul>
 
           <div class="tab-content" data-aos="fade-up" data-aos-delay="200">
-            <div class="tab-pane fade active show" id="menu-starters">
+            <div class="tab-pane fade active show" id="menu-full-meal">
               <div class="tab-header text-center">
                 <p>Menu</p>
-                <h3>Starters</h3>
+                <h3>Full Meal</h3>
               </div>
-              <div class="row gy-5" id="menu-starters-row"></div>
+              <div class="row gy-5" id="menu-full-meal-row"></div>
             </div>
-            <!-- End Starter Menu Content -->
+            <!-- End Full Meal Menu Content -->
 
-            <div class="tab-pane fade" id="menu-breakfast">
+            <div class="tab-pane fade" id="menu-individual-items">
               <div class="tab-header text-center">
                 <p>Menu</p>
-                <h3>Breakfast</h3>
+                <h3>Individual Items</h3>
               </div>
-              <div class="row gy-5" id="menu-breakfast-row"></div>
+              <div class="row gy-5" id="menu-individual-items-row"></div>
             </div>
-            <!-- End Breakfast Menu Content -->
+            <!-- End Individual Items Menu Content -->
 
-            <div class="tab-pane fade" id="menu-lunch">
+            <div class="tab-pane fade" id="menu-add-ons">
               <div class="tab-header text-center">
                 <p>Menu</p>
-                <h3>Lunch</h3>
+                <h3>Add-Ons</h3>
               </div>
-              <div class="row gy-5" id="menu-lunch-row"></div>
-            </div>
-            <!-- End Lunch Menu Content -->
-
-            <div class="tab-pane fade" id="menu-dinner">
-              <div class="tab-header text-center">
-                <p>Menu</p>
-                <h3>Dinner</h3>
-              </div>
-              <div class="row gy-5" id="menu-dinner-row"></div>
+              <div class="row gy-5" id="menu-add-ons-row"></div>
             </div>
             <!-- End Dinner Menu Content -->
           </div>
@@ -880,10 +860,11 @@
                             class="form-control"
                             required
                           >
-                            <option value="starters">Starters</option>
-                            <option value="breakfast">Breakfast</option>
-                            <option value="lunch">Lunch</option>
-                            <option value="dinner">Dinner</option>
+                            <option value="full-meal">Full Meal</option>
+                            <option value="individual-items">
+                              Individual Items
+                            </option>
+                            <option value="add-ons">Add-Ons</option>
                           </select>
                         </div>
                         <div class="col-md-6">

@@ -1,71 +1,71 @@
 [
   {
-    "id": "starter-1",
-    "category": "starters",
+    "id": "full-meal-1",
+    "category": "full-meal",
     "name": "Aloo Tikki",
     "description": "Crispy spiced potato cakes served with chutney.",
     "price": "PKR 295",
     "image": "assets/img/menu/menu-item-1.png"
   },
   {
-    "id": "starter-2",
-    "category": "starters",
+    "id": "full-meal-2",
+    "category": "full-meal",
     "name": "Vegetable Pakora",
     "description": "Golden fritters made from fresh vegetables and spices.",
     "price": "PKR 345",
     "image": "assets/img/menu/menu-item-2.png"
   },
   {
-    "id": "starter-3",
-    "category": "starters",
+    "id": "full-meal-3",
+    "category": "full-meal",
     "name": "Dahi Bhalla",
     "description": "Soft lentil dumplings served with creamy yogurt and chutney.",
     "price": "PKR 375",
     "image": "assets/img/menu/menu-item-5.png"
   },
   {
-    "id": "breakfast-1",
-    "category": "breakfast",
+    "id": "individual-items-1",
+    "category": "individual-items",
     "name": "Paratha Roll",
     "description": "Warm stuffed paratha roll with fresh chutney.",
     "price": "PKR 395",
     "image": "assets/img/menu/menu-item-1.png"
   },
   {
-    "id": "breakfast-2",
-    "category": "breakfast",
+    "id": "individual-items-2",
+    "category": "individual-items",
     "name": "Egg Bhurji",
     "description": "Fluffy spiced scrambled eggs with soft bread.",
     "price": "PKR 450",
     "image": "assets/img/menu/menu-item-2.png"
   },
   {
-    "id": "lunch-1",
-    "category": "lunch",
+    "id": "full-meal-4",
+    "category": "full-meal",
     "name": "Chicken Curry",
     "description": "Home-style chicken curry served with rice or roti.",
     "price": "PKR 895",
     "image": "assets/img/menu/menu-item-1.png"
   },
   {
-    "id": "lunch-2",
-    "category": "lunch",
+    "id": "full-meal-5",
+    "category": "full-meal",
     "name": "Dal Makhni",
     "description": "Creamy lentils cooked with butter and spices.",
     "price": "PKR 825",
     "image": "assets/img/menu/menu-item-2.png"
   },
   {
-    "id": "dinner-1",
-    "category": "dinner",
+    "id": "add-ons-1",
+    "category": "add-ons",
     "name": "Chapli Kebab",
     "description": "Spiced beef kebab served with chutney and salad.",
     "price": "PKR 895",
     "image": "assets/img/menu/menu-item-1.png"
   },
   {
-    "id": "dinner-2",
-    "category": "dinner",
+    "id": "add-ons-2",
+    "category": "add-ons",
     "name": "Paneer Tikka",
     "description": "Marinated paneer grilled to perfection.",
     "price": "PKR 745",
