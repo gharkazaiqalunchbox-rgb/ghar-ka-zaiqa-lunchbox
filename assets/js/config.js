@@ -11,7 +11,9 @@ window.__CONFIG = {
   // - Railway: https://your-app-name.up.railway.app
   // - Heroku: https://your-app-name.herokuapp.com
   backendUrl:
-    window.location.protocol === "file:"
-      ? "http://localhost:3000"
+    window.location.protocol === "file:" ||
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1"
+      ? "http://localhost:4000"
       : "https://wms-pk.solaxpower.com/lunchbox-api", // CHANGE THIS to your deployed backend URL
 };

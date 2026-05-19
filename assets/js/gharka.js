@@ -41,6 +41,15 @@
 
   const API_BASE = BACKEND_URL;
 
+  function resolveImageUrl(imagePath) {
+    if (!imagePath) return "";
+    // If it's an absolute URL already, return as-is
+    if (/^https?:\/\//i.test(imagePath)) return imagePath;
+    // If it starts with a slash, strip it to avoid double slashes
+    const cleanPath = imagePath.replace(/^\//, "");
+    return `${API_BASE}/${cleanPath}`;
+  }
+
   let adminToken = null;
   let adminUser = null;
   let adminLoggedIn = false;
@@ -728,8 +737,8 @@
         .map(
           (item) => `
           <div class="col-lg-4 menu-item">
-            <a href="${item.image}" class="glightbox" data-gallery="images-gallery">
-              <img src="${item.image}" class="menu-img img-fluid" alt="${item.name}" />
+              <a href="${resolveImageUrl(item.image)}" class="glightbox" data-gallery="images-gallery">
+              <img src="${resolveImageUrl(item.image)}" class="menu-img img-fluid" alt="${item.name}" />
             </a>
             <h4>${item.name}</h4>
             <p class="ingredients">${item.description}</p>
@@ -771,8 +780,8 @@
           .map(
             (item) => `
             <div class="swiper-slide">
-              <a class="glightbox" data-gallery="images-gallery" href="${item.image}">
-                <img src="${item.image}" class="img-fluid" alt="${item.alt}" />
+              <a class="glightbox" data-gallery="images-gallery" href="${resolveImageUrl(item.image)}">
+                <img src="${resolveImageUrl(item.image)}" class="img-fluid" alt="${item.alt}" />
               </a>
             </div>
           `,
@@ -984,7 +993,7 @@
       dom.menuImage.value = item.image;
       dom.menuImageFile.value = "";
       if (item.image) {
-        dom.menuImagePreview.src = item.image;
+        dom.menuImagePreview.src = resolveImageUrl(item.image);
         dom.menuImagePreview.classList.remove("d-none");
       } else {
         dom.menuImagePreview.classList.add("d-none");
@@ -1025,48 +1034,39 @@
       formData.append("image", imageUrl);
     }
 
+    if (!adminLoggedIn) {
+      throw new Error(
+        "Admin authentication required. Please log in before adding or editing menu items.",
+      );
+    }
+
     try {
-      if (editingMenuId && adminLoggedIn) {
+      if (editingMenuId) {
         const response = await fetch(`${API_BASE}/api/menu/${editingMenuId}`, {
           method: "PUT",
           headers: getAuthHeaders(),
           body: formData,
         });
         if (!response.ok) {
-          throw new Error(`Server error: ${response.status}`);
+          const errorText = await response.text();
+          throw new Error(errorText || `Server error: ${response.status}`);
         }
         const updated = await response.json();
         menuItems = menuItems.map((item) =>
           item.id === editingMenuId ? updated : item,
         );
-      } else if (!editingMenuId && adminLoggedIn) {
+      } else {
         const response = await fetch(`${API_BASE}/api/menu`, {
           method: "POST",
           headers: getAuthHeaders(),
           body: formData,
         });
         if (!response.ok) {
-          throw new Error(`Server error: ${response.status}`);
+          const errorText = await response.text();
+          throw new Error(errorText || `Server error: ${response.status}`);
         }
         const created = await response.json();
         menuItems.unshift(created);
-      } else {
-        // Fallback for local storage
-        const newItem = {
-          id: `menu-${Date.now()}`,
-          category,
-          name,
-          description,
-          price,
-          image: imageFile ? URL.createObjectURL(imageFile) : imageUrl,
-        };
-        if (editingMenuId) {
-          menuItems = menuItems.map((item) =>
-            item.id === editingMenuId ? { ...item, ...newItem } : item,
-          );
-        } else {
-          menuItems.unshift(newItem);
-        }
       }
 
       saveStorage(STORAGE_KEYS.menu, menuItems);
@@ -1151,7 +1151,7 @@
       dom.galleryImageUrl.value = item.image;
       dom.galleryImageFile.value = "";
       if (item.image) {
-        dom.galleryImagePreview.src = item.image;
+        dom.galleryImagePreview.src = resolveImageUrl(item.image);
         dom.galleryImagePreview.classList.remove("d-none");
       } else {
         dom.galleryImagePreview.classList.add("d-none");
@@ -1183,8 +1183,14 @@
       formData.append("image", imageUrl);
     }
 
+    if (!adminLoggedIn) {
+      throw new Error(
+        "Admin authentication required. Please log in before adding or editing gallery images.",
+      );
+    }
+
     try {
-      if (editingGalleryId && adminLoggedIn) {
+      if (editingGalleryId) {
         const response = await fetch(
           `${API_BASE}/api/gallery/${editingGalleryId}`,
           {
@@ -1194,37 +1200,25 @@
           },
         );
         if (!response.ok) {
-          throw new Error(`Server error: ${response.status}`);
+          const errorText = await response.text();
+          throw new Error(errorText || `Server error: ${response.status}`);
         }
         const updated = await response.json();
         galleryItems = galleryItems.map((item) =>
           item.id === editingGalleryId ? updated : item,
         );
-      } else if (!editingGalleryId && adminLoggedIn) {
+      } else {
         const response = await fetch(`${API_BASE}/api/gallery`, {
           method: "POST",
           headers: getAuthHeaders(),
           body: formData,
         });
         if (!response.ok) {
-          throw new Error(`Server error: ${response.status}`);
+          const errorText = await response.text();
+          throw new Error(errorText || `Server error: ${response.status}`);
         }
         const created = await response.json();
         galleryItems.unshift(created);
-      } else {
-        // Fallback for local storage
-        const newItem = {
-          id: `gallery-${Date.now()}`,
-          image: imageFile ? URL.createObjectURL(imageFile) : imageUrl,
-          alt,
-        };
-        if (editingGalleryId) {
-          galleryItems = galleryItems.map((item) =>
-            item.id === editingGalleryId ? { ...item, ...newItem } : item,
-          );
-        } else {
-          galleryItems.unshift(newItem);
-        }
       }
 
       saveStorage(STORAGE_KEYS.gallery, galleryItems);
