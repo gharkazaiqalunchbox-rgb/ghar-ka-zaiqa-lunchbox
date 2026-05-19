@@ -450,18 +450,18 @@
           >
             <li class="nav-item">
               <a
-                class="nav-link active show"
+                class="nav-link"
                 data-bs-toggle="tab"
                 data-bs-target="#menu-full-meal"
               >
-                <h4>Full Meal</h4>
+                <h4>Full Meals</h4>
               </a>
             </li>
             <!-- End tab nav item -->
 
             <li class="nav-item">
               <a
-                class="nav-link"
+                class="nav-link active show"
                 data-bs-toggle="tab"
                 data-bs-target="#menu-individual-items"
               >
@@ -483,16 +483,16 @@
           </ul>
 
           <div class="tab-content" data-aos="fade-up" data-aos-delay="200">
-            <div class="tab-pane fade active show" id="menu-full-meal">
+            <div class="tab-pane fade" id="menu-full-meal">
               <div class="tab-header text-center">
                 <p>Menu</p>
-                <h3>Full Meal</h3>
+                <h3>Full Meals</h3>
               </div>
               <div class="row gy-5" id="menu-full-meal-row"></div>
             </div>
-            <!-- End Full Meal Menu Content -->
+            <!-- End Full Meals Menu Content -->
 
-            <div class="tab-pane fade" id="menu-individual-items">
+            <div class="tab-pane fade active show" id="menu-individual-items">
               <div class="tab-header text-center">
                 <p>Menu</p>
                 <h3>Individual Items</h3>
@@ -508,7 +508,7 @@
               </div>
               <div class="row gy-5" id="menu-add-ons-row"></div>
             </div>
-            <!-- End Dinner Menu Content -->
+            <!-- End Add-Ons Menu Content -->
           </div>
         </div>
       </section>
@@ -860,7 +860,7 @@
                             class="form-control"
                             required
                           >
-                            <option value="full-meal">Full Meal</option>
+                            <option value="full-meal">Full Meals</option>
                             <option value="individual-items">
                               Individual Items
                             </option>
