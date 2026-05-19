@@ -1363,6 +1363,10 @@ section,
   }
 }
 
+.menu .tab-content .menu-item {
+  text-align: center;
+}
+
 .menu .tab-content .menu-item h4 {
   font-size: 24px;
   font-weight: 400;
@@ -1373,7 +1377,7 @@ section,
 .menu .tab-content .menu-item .ingredients {
   font-family: var(--nav-font);
   color: color-mix(in srgb, var(--default-color), transparent 50%);
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 
 .menu .tab-content .menu-item .price {

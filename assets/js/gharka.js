@@ -742,7 +742,7 @@
             </a>
             <h4>${item.name}</h4>
             <p class="ingredients">${item.description}</p>
-            <p class="price">${item.price}</p>
+            <p class="price">${formatPrice(item.price)}</p>
             <button type="button" class="btn btn-sm btn-outline-success add-to-cart-btn" data-id="${item.id}">Add to Cart</button>
           </div>
         `,
@@ -989,7 +989,7 @@
       if (!item) return;
       dom.menuName.value = item.name;
       dom.menuCategory.value = item.category;
-      dom.menuPrice.value = item.price;
+      dom.menuPrice.value = parsePrice(item.price) || "";
       dom.menuImage.value = item.image;
       dom.menuImageFile.value = "";
       if (item.image) {
@@ -1019,14 +1019,15 @@
     const description = dom.menuDescription.value.trim();
     const imageFile = dom.menuImageFile.files[0];
     const imageUrl = dom.menuImage.value.trim();
+    const parsedPrice = parsePrice(price);
 
-    if (!name || !price || !description) return;
+    if (!name || !price || !description || parsedPrice <= 0) return;
     if (!imageFile && !imageUrl) return;
 
     const formData = new FormData();
     formData.append("name", name);
     formData.append("category", category);
-    formData.append("price", price);
+    formData.append("price", formatPrice(parsedPrice));
     formData.append("description", description);
     if (imageFile) {
       formData.append("image", imageFile);

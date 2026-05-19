@@ -868,13 +868,19 @@
                           </select>
                         </div>
                         <div class="col-md-6">
-                          <input
-                            type="text"
-                            id="menu-price"
-                            class="form-control"
-                            placeholder="Price (e.g. PKR 499)"
-                            required
-                          />
+                          <div class="input-group">
+                            <span class="input-group-text">PKR</span>
+                            <input
+                              type="number"
+                              id="menu-price"
+                              class="form-control"
+                              placeholder="499"
+                              min="0"
+                              step="1"
+                              inputmode="numeric"
+                              required
+                            />
+                          </div>
                         </div>
                         <div class="col-md-6">
                           <input
