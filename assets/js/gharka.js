@@ -286,6 +286,16 @@
     return parseFloat(numStr) || 0;
   }
 
+  function escapeHtml(value) {
+    if (value === null || value === undefined) return "";
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
   async function fetchFromApi(endpoint, options = {}) {
     const config = {
       headers: {
@@ -1339,20 +1349,31 @@
     const reviewsList = document.getElementById("admin-reviews-list");
     if (!reviewsList) return;
 
-    if (!reviews.length) {
-      reviewsList.innerHTML = '<p class="text-muted">No reviews yet.</p>';
+    const validReviews = Array.isArray(reviews)
+      ? reviews.filter((review) => review && review.id)
+      : [];
+
+    if (Array.isArray(reviews) && validReviews.length !== reviews.length) {
+      console.warn(
+        "Some admin reviews were skipped because they are missing an id:",
+        reviews.filter((review) => !review || !review.id),
+      );
+    }
+
+    if (!validReviews.length) {
+      reviewsList.innerHTML = '<p class="text-muted">No valid reviews available.</p>';
       return;
     }
 
-    reviewsList.innerHTML = reviews
+    reviewsList.innerHTML = validReviews
       .map(
         (review) => `
         <div class="admin-list-item" style="border-left: 4px solid ${review.approved ? "#28a745" : "#ffc107"}">
           <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
             <div>
-              <strong>${review.customerName}</strong>
-              <p class="mb-1"><small>${review.customerEmail}</small></p>
-              <p class="mb-2">"${review.reviewText}"</p>
+              <strong>${escapeHtml(review.customerName)}</strong>
+              <p class="mb-1"><small>${escapeHtml(review.customerEmail)}</small></p>
+              <p class="mb-2">"${escapeHtml(review.reviewText)}"</p>
               <p class="mb-1">
                 <span style="color: #ffc107;">
                   ${"⭐".repeat(review.rating)}
@@ -1364,16 +1385,16 @@
               ${
                 !review.approved
                   ? `
-                <button class="btn btn-sm btn-success approve-review-btn" data-id="${review.id}">
+                <button class="btn btn-sm btn-success approve-review-btn" data-id="${escapeHtml(review.id)}">
                   Approve
                 </button>
               `
                   : ""
               }
-              <button class="btn btn-sm btn-danger reject-review-btn" data-id="${review.id}">
+              <button class="btn btn-sm btn-danger reject-review-btn" data-id="${escapeHtml(review.id)}">
                 ${review.approved ? "Unapprove" : "Reject"}
               </button>
-              <button class="btn btn-sm btn-outline-danger delete-review-btn" data-id="${review.id}">
+              <button class="btn btn-sm btn-outline-danger delete-review-btn" data-id="${escapeHtml(review.id)}">
                 Delete
               </button>
             </div>
