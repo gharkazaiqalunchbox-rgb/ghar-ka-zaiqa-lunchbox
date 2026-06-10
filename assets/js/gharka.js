@@ -278,7 +278,7 @@
 
   function formatPrice(value) {
     const price = parsePrice(value);
-    return `PKR ${price.toFixed(0)}`;
+    return `PKR ${price.toFixed(0)}`; // No decimals for whole numbers, otherwise show as-is
   }
 
   function parsePrice(priceStr) {
