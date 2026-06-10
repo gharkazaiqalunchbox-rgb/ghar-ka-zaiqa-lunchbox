@@ -1386,19 +1386,25 @@
     // Add event listeners
     document.querySelectorAll(".approve-review-btn").forEach((btn) => {
       btn.addEventListener("click", (e) => {
-        approveReview(e.target.dataset.id);
+        const reviewId = e.currentTarget.dataset.id;
+        if (!reviewId) return;
+        approveReview(reviewId);
       });
     });
 
     document.querySelectorAll(".reject-review-btn").forEach((btn) => {
       btn.addEventListener("click", (e) => {
-        rejectReview(e.target.dataset.id);
+        const reviewId = e.currentTarget.dataset.id;
+        if (!reviewId) return;
+        rejectReview(reviewId);
       });
     });
 
     document.querySelectorAll(".delete-review-btn").forEach((btn) => {
       btn.addEventListener("click", (e) => {
-        deleteReview(e.target.dataset.id);
+        const reviewId = e.currentTarget.dataset.id;
+        if (!reviewId) return;
+        deleteReview(reviewId);
       });
     });
   }
