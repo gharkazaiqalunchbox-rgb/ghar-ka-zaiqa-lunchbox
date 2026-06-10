@@ -11,8 +11,9 @@ const { db, queries } = require("./data/db");
 const app = express();
 
 const port = process.env.PORT || 3000;
+const frontendDir = path.join(__dirname, "..", "frontend");
 const dataDir = path.join(__dirname, "data");
-const assetsDir = path.join(__dirname, "assets");
+const assetsDir = path.join(frontendDir, "assets");
 const menuImgDir = path.join(assetsDir, "img", "menu");
 const galleryImgDir = path.join(assetsDir, "img", "gallery");
 const JWT_SECRET = process.env.JWT_SECRET || "GharKaZaiqaSecret2026!";
@@ -93,8 +94,7 @@ function validateEmailAddress(email) {
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "assets")));
-app.use(express.static(path.join(__dirname, ".")));
+app.use(express.static(frontendDir));
 
 // Ensure directories exist
 function ensureDirectories() {
@@ -405,7 +405,7 @@ app.put("/api/menu/:id", authorize, uploadMenu.single("image"), (req, res) => {
 
     // Delete old image if a new file is being uploaded and old image exists
     if (req.file && oldItem.image && !oldItem.image.startsWith("http")) {
-      const oldImagePath = path.join(__dirname, oldItem.image);
+      const oldImagePath = path.join(frontendDir, oldItem.image);
       deleteFile(oldImagePath);
     }
 
@@ -443,7 +443,7 @@ app.delete("/api/menu/:id", authorize, (req, res) => {
     }
 
     if (item.image && !item.image.startsWith("http")) {
-      const imagePath = path.join(__dirname, item.image);
+      const imagePath = path.join(frontendDir, item.image);
       deleteFile(imagePath);
     }
 
@@ -503,7 +503,7 @@ app.put(
 
       // Delete old image if a new file is being uploaded and old image exists
       if (req.file && oldItem.image && !oldItem.image.startsWith("http")) {
-        const oldImagePath = path.join(__dirname, oldItem.image);
+        const oldImagePath = path.join(frontendDir, oldItem.image);
         deleteFile(oldImagePath);
       }
 
@@ -532,7 +532,7 @@ app.delete("/api/gallery/:id", authorize, (req, res) => {
     }
 
     if (item.image && !item.image.startsWith("http")) {
-      const imagePath = path.join(__dirname, item.image);
+      const imagePath = path.join(frontendDir, item.image);
       deleteFile(imagePath);
     }
 
