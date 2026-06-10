@@ -1361,7 +1361,8 @@
     }
 
     if (!validReviews.length) {
-      reviewsList.innerHTML = '<p class="text-muted">No valid reviews available.</p>';
+      reviewsList.innerHTML =
+        '<p class="text-muted">No valid reviews available.</p>';
       return;
     }
 
