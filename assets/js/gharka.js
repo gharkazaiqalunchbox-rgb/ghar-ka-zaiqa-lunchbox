@@ -277,7 +277,8 @@
   }
 
   function formatPrice(value) {
-    return `PKR ${Number(value).toFixed(0)}`;
+    const price = parsePrice(value);
+    return `PKR ${price.toFixed(0)}`;
   }
 
   function parsePrice(priceStr) {
