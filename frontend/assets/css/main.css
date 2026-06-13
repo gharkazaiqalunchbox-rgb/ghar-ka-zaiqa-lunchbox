@@ -1380,10 +1380,44 @@ section,
   margin-bottom: 10px;
 }
 
+.menu .tab-content .menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+  text-align: center;
+}
+
+.menu .tab-content .menu-item a.glightbox {
+  flex-shrink: 0;
+}
+
+.menu .tab-content .menu-item h4 {
+  flex-shrink: 0;
+}
+
+.menu .tab-content .menu-item .ingredients {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
 .menu .tab-content .menu-item .price {
   font-size: 24px;
   font-weight: 700;
   color: var(--accent-color);
+  margin-bottom: 15px;
+  flex-shrink: 0;
+}
+
+.menu .tab-content .menu-item .add-to-cart-btn {
+  width: 100%;
+  max-width: 200px;
+  margin-top: auto;
+  flex-shrink: 0;
 }
 
 /*--------------------------------------------------------------

@@ -1,0 +1,133 @@
+/* Menu Item Grid Layout Fix */
+.menu .tab-content .menu-item {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto auto;
+  gap: 12px;
+  text-align: center;
+  min-height: 600px;
+  align-items: start;
+}
+
+.menu .tab-content .menu-item h4 {
+  font-size: 24px;
+  font-weight: 400;
+  margin: 0 !important;
+  font-family: var(--default-font);
+}
+
+.menu .tab-content .menu-item .ingredients {
+  font-family: var(--nav-font);
+  color: color-mix(in srgb, var(--default-color), transparent 50%);
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-row: 3;
+  align-self: center;
+}
+
+.menu .tab-content .menu-item .price {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent-color);
+  margin: 0 !important;
+  grid-row: 4;
+}
+
+.menu .tab-content .menu-item .add-to-cart-btn {
+  width: 100%;
+  max-width: 200px;
+  justify-self: center;
+  grid-row: 5;
+  align-self: end;
+}
+
+.menu .tab-content .menu-item a.glightbox {
+  grid-row: 1;
+}
+
+.menu .tab-content .menu-item .menu-img {
+  margin: 0 !important;
+}
+
+/* Flying Item Animation */
+@keyframes flyToCart {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--fly-x), var(--fly-y)) scale(0.2);
+  }
+}
+
+.flying-item {
+  position: fixed;
+  pointer-events: none;
+  z-index: 5001;
+  animation: flyToCart 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(47, 125, 54, 0.28);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #2f7d36;
+  border: 2px solid rgba(47, 125, 54, 0.15);
+  font-size: 12px;
+}
+
+/* Toast Styling */
+.ghar-toast {
+  background: transparent;
+}
+
+.ghar-toast-header {
+  padding: 12px 16px;
+  font-weight: 600;
+}
+
+.ghar-toast-body {
+  padding: 16px;
+  border-radius: 0 0 8px 8px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* Toast slide/fade */
+.ghar-toast {
+  display: block;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    opacity 0.32s ease,
+    transform 0.32s ease;
+}
+
+.ghar-toast.showing {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Badge pop animation */
+@keyframes badgePop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.25);
+  }
+  70% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.cart-badge.badge-pop {
+  animation: badgePop 0.45s ease;
+}
