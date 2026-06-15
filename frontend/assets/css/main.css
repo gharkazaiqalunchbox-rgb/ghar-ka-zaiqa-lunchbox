@@ -16,8 +16,8 @@
     "Roboto", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
     Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji",
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --heading-font: "Amatic SC", sans-serif;
-  --nav-font: "Inter", sans-serif;
+  --heading-font: var(--default-font);
+  --nav-font: var(--default-font);
 }
 
 /* Global Colors - The following color variables are used throughout the website. Updating them here will change the color scheme of the entire website */
