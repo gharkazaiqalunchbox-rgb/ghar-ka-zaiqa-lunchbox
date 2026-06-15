@@ -754,7 +754,7 @@
             <h4>${item.name}</h4>
             <p class="ingredients">${item.description}</p>
             <p class="price">${formatPrice(item.price)}</p>
-            <button type="button" class="btn btn-sm btn-outline-success add-to-cart-btn" data-id="${item.id}">Add to Cart</button>
+            <button type="button" class="btn btn-sm btn-outline-success add-to-cart-btn" data-id="${item.id}" data-img="${resolveImageUrl(item.image)}">Add to Cart</button>
           </div>
         `,
         )
@@ -856,7 +856,7 @@
     const addBtn = event.target.closest(".add-to-cart-btn");
     if (addBtn) {
       event.preventDefault();
-      addToCart(addBtn.dataset.id);
+      addToCart(addBtn.dataset.id, addBtn);
       return;
     }
 
@@ -870,7 +870,7 @@
     }
   });
 
-  function addToCart(itemId) {
+  function addToCart(itemId, buttonElement = null) {
     const menuItem = findMenuItem(itemId);
     if (!menuItem) return;
 
@@ -881,10 +881,23 @@
       cart.push({ id: itemId, qty: 1 });
     }
     saveStorage(STORAGE_KEYS.cart, cart);
-    renderCart();
+    // Defer UI updates (badge, toast, cart render) until after flying animation completes
+    const afterAdd = () => {
+      renderCart();
+      updateCartBadge();
+      showToast(`✓ ${menuItem.name} added to cart!`, false, 3000);
+    };
 
-    // Show toast notification
-    showOrderMessage(`✓ ${menuItem.name} added to cart!`, false, 3000);
+    // If there's a source button, animate flying item then call afterAdd
+    if (buttonElement) {
+      // prefer data-img attribute if set
+      const img =
+        buttonElement.dataset.img || resolveImageUrl(menuItem.image) || "";
+      animateFlyingItem(buttonElement, img, afterAdd);
+    } else {
+      // no animation possible, run updates immediately
+      afterAdd();
+    }
   }
 
   function removeFromCart(itemId) {
@@ -899,12 +912,84 @@
     }
     saveStorage(STORAGE_KEYS.cart, cart);
     renderCart();
+    updateCartBadge();
   }
 
   function updateCartBadge() {
     if (!dom.cartBadge) return;
     const count = cart.reduce((sum, item) => sum + item.qty, 0);
     dom.cartBadge.textContent = count;
+    // pop animation
+    dom.cartBadge.classList.remove("badge-pop");
+    // trigger reflow to restart animation
+    void dom.cartBadge.offsetWidth;
+    dom.cartBadge.classList.add("badge-pop");
+    setTimeout(() => dom.cartBadge.classList.remove("badge-pop"), 600);
+  }
+
+  function animateFlyingItem(
+    sourceElement,
+    itemImageUrl = "",
+    onComplete = null,
+  ) {
+    const container = document.getElementById("flying-items-container");
+    if (!container) {
+      if (typeof onComplete === "function") onComplete();
+      return;
+    }
+
+    const sourceRect = sourceElement.getBoundingClientRect();
+    const cartButton = document.getElementById("cart-toggle");
+    if (!cartButton) {
+      if (typeof onComplete === "function") onComplete();
+      return;
+    }
+    const cartRect = cartButton.getBoundingClientRect();
+
+    // Create flying item wrapper
+    const flyingItem = document.createElement("div");
+    flyingItem.className = "flying-item";
+
+    // create image inside flying item for better visual
+    const img = document.createElement("img");
+    img.style.width = "100%";
+    img.style.height = "100%";
+    img.style.objectFit = "cover";
+    img.style.display = "block";
+    if (itemImageUrl) img.src = itemImageUrl;
+    else img.src = "assets/img/menu/menu-item-1.png";
+
+    flyingItem.appendChild(img);
+
+    // size for flying thumbnail
+    const size = 48;
+    // sourceRect and cartRect are relative to viewport; flying item is fixed, so use them directly
+    const startLeft = sourceRect.left + sourceRect.width / 2 - size / 2;
+    const startTop = sourceRect.top + sourceRect.height / 2 - size / 2;
+    const targetLeft = cartRect.left + cartRect.width / 2 - size / 2;
+    const targetTop = cartRect.top + cartRect.height / 2 - size / 2;
+
+    flyingItem.style.left = startLeft + "px";
+    flyingItem.style.top = startTop + "px";
+    flyingItem.style.width = size + "px";
+    flyingItem.style.height = size + "px";
+
+    // compute delta (relative translate values)
+    const deltaX = targetLeft - startLeft;
+    const deltaY = targetTop - startTop;
+
+    flyingItem.style.setProperty("--fly-x", deltaX + "px");
+    flyingItem.style.setProperty("--fly-y", deltaY + "px");
+
+    container.appendChild(flyingItem);
+
+    // cleanup after animation duration
+    const duration = 900; // ms
+    setTimeout(() => {
+      flyingItem.remove();
+      if (typeof onComplete === "function") onComplete();
+      else updateCartBadge();
+    }, duration);
   }
 
   function requestAdminAccess() {
@@ -1331,6 +1416,62 @@
       dom.orderMessage.classList.add("d-none");
     }, duration);
   }
+
+  function showToast(message, isError = false, duration = 3000) {
+    const toastElement = document.getElementById("toast-notification");
+    const toastHeader = document.getElementById("toast-header");
+    const toastBody = document.getElementById("toast-body");
+
+    if (!toastElement || !toastHeader || !toastBody) return;
+
+    toastBody.textContent = message;
+
+    if (isError) {
+      toastHeader.style.backgroundColor = "#f8d7da";
+      toastHeader.style.borderBottom = "1px solid #f5c6cb";
+      toastBody.style.backgroundColor = "#f8f9fa";
+      toastBody.style.color = "#721c24";
+    } else {
+      toastHeader.style.backgroundColor = "#d4edda";
+      toastHeader.style.borderBottom = "1px solid #c3e6cb";
+      toastBody.style.backgroundColor = "#f8f9fa";
+      toastBody.style.color = "#155724";
+    }
+
+    // Ensure it's visible, then animate slide/fade in via class
+    toastElement.style.display = "block";
+    // allow layout then add class
+    requestAnimationFrame(() => {
+      toastElement.classList.add("showing");
+    });
+
+    // hide after duration (remove class then hide element after transition)
+    setTimeout(() => {
+      toastElement.classList.remove("showing");
+      // hide after transition (matching CSS 320ms)
+      setTimeout(() => {
+        toastElement.style.display = "none";
+      }, 340);
+    }, duration);
+  }
+
+  function hideToast() {
+    const toastElement = document.getElementById("toast-notification");
+    if (!toastElement) return;
+    toastElement.classList.remove("showing");
+    setTimeout(() => {
+      toastElement.style.display = "none";
+    }, 340);
+  }
+
+  // Close button handler for the custom toast
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("#toast-notification .btn-close");
+    if (btn) {
+      e.preventDefault();
+      hideToast();
+    }
+  });
 
   // Admin Review Management
   async function loadAdminReviews() {
