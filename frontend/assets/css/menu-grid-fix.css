@@ -112,6 +112,44 @@
   transform: translateY(0);
 }
 
+#toast-container {
+  right: 20px;
+  left: auto;
+  width: auto;
+  max-width: 450px;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+#toast-notification,
+.ghar-toast {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  #toast-container {
+    left: 10px !important;
+    right: 10px !important;
+    max-width: calc(100vw - 20px) !important;
+    width: auto !important;
+    top: 60px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  #toast-container {
+    top: 50px !important;
+    max-width: calc(100vw - 16px);
+  }
+
+  .ghar-toast-body {
+    padding: 14px;
+  }
+}
+
 /* Badge pop animation */
 @keyframes badgePop {
   0% {
