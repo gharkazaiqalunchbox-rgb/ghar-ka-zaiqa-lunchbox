@@ -747,14 +747,14 @@
       row.innerHTML = list
         .map(
           (item) => `
-          <div class="col-lg-4 menu-item">
+          <div class="col-12 col-sm-6 col-md-4 col-lg-4 menu-item">
               <a href="${resolveImageUrl(item.image)}" class="glightbox" data-gallery="images-gallery">
               <img src="${resolveImageUrl(item.image)}" class="menu-img img-fluid" alt="${item.name}" />
             </a>
             <h4>${item.name}</h4>
             <p class="ingredients">${item.description}</p>
             <p class="price">${formatPrice(item.price)}</p>
-            <button type="button" class="btn btn-sm btn-outline-success add-to-cart-btn" data-id="${item.id}" data-img="${resolveImageUrl(item.image)}">Add to Cart</button>
+            <button type="button" class="btn btn-sm btn-outline-success add-to-cart-btn" data-id="${item.id}" data-img="${resolveImageUrl(item.image)}"><span class="btn-label">Add to Cart</span></button>
           </div>
         `,
         )
@@ -868,6 +868,34 @@
         bootstrap.Modal.getOrCreateInstance(cartModal).show();
       }
     }
+  });
+
+  document.addEventListener("pointerdown", (event) => {
+    if (event.pointerType !== "touch") return;
+    const menuItem = event.target.closest(".menu-item");
+    if (!menuItem) return;
+
+    const addBtn = menuItem.querySelector(".add-to-cart-btn");
+    const label = menuItem.querySelector(".btn-label");
+
+    menuItem.classList.remove("touch-active");
+    if (addBtn) addBtn.classList.remove("touch-active");
+    if (label) label.classList.remove("touch-active");
+
+    // Force reflow to restart animations
+    void menuItem.offsetWidth;
+    if (addBtn) void addBtn.offsetWidth;
+    if (label) void label.offsetWidth;
+
+    menuItem.classList.add("touch-active");
+    if (addBtn) addBtn.classList.add("touch-active");
+    if (label) label.classList.add("touch-active");
+
+    window.setTimeout(() => {
+      menuItem.classList.remove("touch-active");
+      if (addBtn) addBtn.classList.remove("touch-active");
+      if (label) label.classList.remove("touch-active");
+    }, 1800);
   });
 
   function addToCart(itemId, buttonElement = null) {
