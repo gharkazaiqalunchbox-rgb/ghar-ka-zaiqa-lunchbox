@@ -186,6 +186,7 @@
     menuImageFile: document.getElementById("menu-image-file"),
     menuImagePreview: document.getElementById("menu-image-preview"),
     menuDescription: document.getElementById("menu-description"),
+    menuDescriptionHelp: document.getElementById("menu-description-help"),
     menuCancelBtn: document.getElementById("menu-cancel-btn"),
     galleryAdminList: document.getElementById("gallery-admin-list"),
     addGalleryButton: document.getElementById("add-gallery-image-btn"),
@@ -703,6 +704,11 @@
     dom.menuImageFile.value = "";
     dom.menuImagePreview.classList.add("d-none");
     dom.menuDescription.value = "";
+    if (dom.menuDescriptionHelp) {
+      dom.menuDescriptionHelp.textContent = "0/20 words • 0/130 chars";
+      dom.menuDescriptionHelp.classList.remove("text-danger", "text-warning");
+      dom.menuDescriptionHelp.classList.add("text-muted");
+    }
     editingMenuId = null;
   }
 
@@ -1135,15 +1141,45 @@
     dom.menuName.focus();
   }
 
+  function trimWords(text, maxWords) {
+    if (!text) return "";
+    const words = text.trim().split(/\s+/).filter(Boolean);
+    if (words.length <= maxWords) return words.join(" ");
+    return words.slice(0, maxWords).join(" ");
+  }
+
   async function saveMenuForm(event) {
     event.preventDefault();
     const name = dom.menuName.value.trim();
     const category = dom.menuCategory.value;
     const price = dom.menuPrice.value.trim();
-    const description = dom.menuDescription.value.trim();
+    let description = dom.menuDescription.value.trim();
     const imageFile = dom.menuImageFile.files[0];
     const imageUrl = dom.menuImage.value.trim();
     const parsedPrice = parsePrice(price);
+
+    // validate description limits: 20 words and 130 characters
+    const rawWords = description
+      ? description.split(/\s+/).filter(Boolean)
+      : [];
+    const chars = description.length;
+    if (rawWords.length > 20 || chars > 130) {
+      if (dom.menuDescriptionHelp) {
+        dom.menuDescriptionHelp.textContent = `${rawWords.length}/20 words • ${chars}/130 chars`;
+        dom.menuDescriptionHelp.classList.remove("text-muted");
+        dom.menuDescriptionHelp.classList.add("text-danger");
+      }
+      showToast(
+        "Description must be 20 words or fewer and 130 characters or fewer.",
+        true,
+      );
+      return;
+    }
+    if (dom.menuDescriptionHelp) {
+      dom.menuDescriptionHelp.textContent = `${rawWords.length}/20 words • ${chars}/130 chars`;
+      dom.menuDescriptionHelp.classList.remove("text-danger");
+      dom.menuDescriptionHelp.classList.add("text-muted");
+    }
 
     if (!name || !price || !description || parsedPrice <= 0) return;
     if (!imageFile && !imageUrl) return;
@@ -1973,6 +2009,21 @@
     }
     if (dom.menuForm) {
       dom.menuForm.addEventListener("submit", saveMenuForm);
+      if (dom.menuDescription && dom.menuDescriptionHelp) {
+        dom.menuDescription.addEventListener("input", (e) => {
+          const val = e.target.value || "";
+          const words = val.trim().split(/\s+/).filter(Boolean);
+          const chars = val.length;
+          dom.menuDescriptionHelp.textContent = `${words.length}/20 words • ${chars}/130 chars`;
+          if (words.length > 20 || chars > 130) {
+            dom.menuDescriptionHelp.classList.remove("text-muted");
+            dom.menuDescriptionHelp.classList.add("text-danger");
+          } else {
+            dom.menuDescriptionHelp.classList.remove("text-danger");
+            dom.menuDescriptionHelp.classList.add("text-muted");
+          }
+        });
+      }
     }
     if (dom.addGalleryButton) {
       dom.addGalleryButton.addEventListener("click", () => openGalleryForm());

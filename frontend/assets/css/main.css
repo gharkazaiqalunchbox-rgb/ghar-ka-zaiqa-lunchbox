@@ -970,6 +970,340 @@ section,
   color: var(--accent-color);
 }
 
+#weekly-menu {
+  position: relative;
+  overflow: hidden;
+}
+
+#weekly-menu::before {
+  content: "";
+  position: absolute;
+  top: 180px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(254, 242, 201, 0.92) 0%,
+      rgba(254, 242, 201, 0.8) 18%,
+      rgba(254, 242, 201, 0.6) 40%,
+      rgba(254, 242, 201, 0.66) 100%
+    ),
+    url("../img/Table-background.png") center / contain no-repeat;
+}
+
+#weekly-menu .container,
+#weekly-menu .section-title,
+#weekly-menu .weekly-menu-card {
+  position: relative;
+  z-index: 1;
+}
+
+.weekly-menu-card {
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow:
+    0 16px 36px rgba(47, 125, 54, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  overflow: hidden;
+}
+
+.weekly-menu-header h3 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  color: var(--heading-color);
+}
+
+.weekly-menu-header p {
+  margin: 0;
+  color: color-mix(in srgb, var(--default-color), transparent 25%);
+}
+
+.weekly-menu-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: var(--accent-color);
+  color: var(--contrast-color);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.weekly-plan-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  min-width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+}
+
+.weekly-plan-table th,
+.weekly-plan-table td {
+  padding: 18px 20px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.weekly-plan-table tbody tr {
+  transition:
+    background-color 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform, box-shadow, background-color;
+}
+
+.weekly-plan-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.32);
+  transform: scale(1.014);
+  box-shadow: 0 20px 36px rgba(0, 0, 0, 0.12);
+}
+
+/* Responsive adjustments for the weekly plan table */
+@media (max-width: 1199px) {
+  .weekly-menu-card {
+    padding: 22px;
+    border-radius: 20px;
+  }
+
+  .section-title p {
+    font-size: 40px;
+  }
+
+  .weekly-plan-table th,
+  .weekly-plan-table td {
+    padding: 14px 16px;
+  }
+}
+
+@media (max-width: 767px) {
+  /* allow horizontal scrolling while keeping the table readable */
+  .weekly-menu-card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .section-title p {
+    font-size: 28px;
+    line-height: 1.05;
+    margin-bottom: 6px;
+  }
+
+  .weekly-menu-header h3 {
+    font-size: 20px;
+  }
+
+  .weekly-menu-badge {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* keep the table readable on small screens by allowing it to scroll */
+  .weekly-plan-table {
+    min-width: 720px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .weekly-plan-table th,
+  .weekly-plan-table td {
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+
+  /* make header remain visible while scrolling horizontally */
+  .weekly-plan-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Use stacked row cards on very small screens for readability */
+  .weekly-plan-table {
+    min-width: 0 !important;
+    width: 100% !important;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .section-title p {
+    font-size: 22px;
+  }
+
+  /* hide the header — we'll show labels inside each cell */
+  .weekly-plan-table thead {
+    display: none !important;
+  }
+
+  /* make sure header cells are hidden as well (higher specificity) */
+  .weekly-plan-table thead th {
+    display: none !important;
+  }
+
+  .weekly-plan-table tbody tr {
+    display: block;
+    margin-bottom: 14px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    padding: 10px 12px;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.04);
+  }
+
+  .weekly-plan-table tbody td {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 6px;
+    font-size: 14px;
+    border: none;
+    line-height: 1.25;
+  }
+
+  /* labels before each value to indicate column meaning */
+  .weekly-plan-table tbody td:nth-child(1)::before {
+    content: "Day";
+  }
+  .weekly-plan-table tbody td:nth-child(2)::before {
+    content: "1st Week";
+  }
+  .weekly-plan-table tbody td:nth-child(3)::before {
+    content: "2nd Week";
+  }
+
+  .weekly-plan-table tbody td::before {
+    display: inline;
+    font-weight: 700;
+    color: var(--accent-color);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    min-width: 70px;
+    flex-shrink: 0;
+  }
+
+  /* make the pop-out effect more subtle on stacked cards */
+  .weekly-plan-table tbody tr:hover {
+    transform: none;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+    background: rgba(255, 255, 255, 0.09);
+  }
+
+  .weekly-menu-card {
+    margin: 0 8px;
+    width: calc(100% - 16px);
+    padding: 12px;
+  }
+}
+
+/* Ultra-small screens: stack labels and values vertically */
+@media (max-width: 360px) {
+  .weekly-plan-table tbody td {
+    display: block;
+    padding: 8px 6px;
+  }
+
+  .weekly-plan-table tbody td::before {
+    display: block;
+    margin-bottom: 4px;
+    min-width: 0;
+    flex-shrink: auto;
+  }
+}
+
+/* Mobile fix: ensure weekly card/table doesn't feel cut off on very small screens */
+@media (max-width: 767px) {
+  #weekly-menu {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .weekly-menu-card {
+    margin: 0 12px;
+    width: calc(100% - 24px);
+    box-shadow: 0 10px 28px rgba(47, 125, 54, 0.08);
+    border-radius: 14px;
+  }
+
+  .weekly-plan-table {
+    min-width: 0 !important;
+    width: 100% !important;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(6px);
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+
+  .weekly-plan-table thead {
+    display: table-header-group; /* keep header but it will scroll horizontally with table */
+  }
+
+  .weekly-plan-table tbody tr {
+    border-radius: 10px;
+    overflow: hidden;
+  }
+}
+
+.weekly-plan-table thead th {
+  background: rgba(47, 125, 54, 0.88);
+  color: var(--contrast-color);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+}
+
+.weekly-plan-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.weekly-plan-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+@media (max-width: 767px) {
+  .weekly-menu-card {
+    padding: 24px;
+  }
+
+  .weekly-menu-header {
+    align-items: stretch;
+  }
+
+  .weekly-menu-badge {
+    width: 100%;
+  }
+
+  .weekly-plan-table th,
+  .weekly-plan-table td {
+    padding: 14px 12px;
+  }
+}
+
 /*--------------------------------------------------------------
 # Hero Section
 --------------------------------------------------------------*/
