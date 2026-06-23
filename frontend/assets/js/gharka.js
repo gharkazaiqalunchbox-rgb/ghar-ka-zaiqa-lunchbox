@@ -704,6 +704,11 @@
     dom.menuImageFile.value = "";
     dom.menuImagePreview.classList.add("d-none");
     dom.menuDescription.value = "";
+    setAvailabilityCheckboxes([]);
+    const weekGroupSelect = document.getElementById("menu-week-group");
+    if (weekGroupSelect) {
+      weekGroupSelect.value = "both";
+    }
     if (dom.menuDescriptionHelp) {
       dom.menuDescriptionHelp.textContent = "0/20 words • 0/130 chars";
       dom.menuDescriptionHelp.classList.remove("text-danger", "text-warning");
@@ -741,13 +746,64 @@
     return menuItems.find((item) => item.id === id);
   }
 
+  const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  function getCurrentDayCode() {
+    return new Date().toLocaleDateString("en-US", { weekday: "short" });
+  }
+
+  function isMenuItemAvailableToday(item) {
+    if (!item || !item.availability) return true;
+    const today = getCurrentDayCode();
+    const availability = String(item.availability)
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean);
+    if (!availability.length) return true;
+    return availability.includes(today);
+  }
+
+  function getSelectedAvailabilityDays() {
+    return Array.from(document.querySelectorAll(".menu-availability-checkbox"))
+      .filter((input) => input.checked)
+      .map((input) => input.value);
+  }
+
+  function setAvailabilityCheckboxes(days) {
+    const selected = Array.isArray(days)
+      ? days
+      : String(days || "").split(",").map((value) => value.trim()).filter(Boolean);
+    document.querySelectorAll(".menu-availability-checkbox").forEach((input) => {
+      input.checked = selected.includes(input.value);
+    });
+  }
+
+  function getCurrentWeekGroup() {
+    const date = new Date();
+    const dayOfMonth = date.getDate();
+    const weekNumber = Math.ceil(dayOfMonth / 7);
+    return weekNumber % 2 === 1 ? "1st" : "2nd";
+  }
+
+  function isMenuItemAvailableInWeek(item) {
+    if (!item || !item.weekGroup || item.weekGroup === "both") return true;
+    return String(item.weekGroup) === getCurrentWeekGroup();
+  }
+
   function renderMenu() {
+    const today = getCurrentDayCode();
+    const currentWeek = getCurrentWeekGroup();
     ["full-meal", "individual-items", "add-ons"].forEach((category) => {
       const row = document.getElementById(`menu-${category}-row`);
       if (!row) return;
-      const list = menuItems.filter((item) => item.category === category);
+      const list = menuItems.filter(
+        (item) =>
+          item.category === category &&
+          isMenuItemAvailableToday(item) &&
+          isMenuItemAvailableInWeek(item),
+      );
       if (!list.length) {
-        row.innerHTML = `<div class="col-12 text-center"><p class="text-muted">No items available in this category yet.</p></div>`;
+        row.innerHTML = `<div class="col-12 text-center"><p class="text-muted">No items available in this category for ${today} (${currentWeek} Week).</p></div>`;
         return;
       }
       row.innerHTML = list
@@ -1058,13 +1114,23 @@
 
     dom.menuAdminList.innerHTML = menuItems
       .map(
-        (item) => `
+        (item) => {
+          const availabilityText = item.availability && item.availability.trim()
+            ? `Days: ${item.availability}`
+            : "Every day";
+          const weekLabel = item.weekGroup === "1st"
+            ? "1st Week"
+            : item.weekGroup === "2nd"
+            ? "2nd Week"
+            : "Every Week";
+          return `
           <div class="admin-list-item">
             <div class="d-flex justify-content-between align-items-start gap-3">
               <div>
                 <strong>${item.name}</strong>
                 <span class="text-muted">(${item.category})</span>
                 <p class="mb-1">${item.description}</p>
+                <p class="mb-1 text-muted small">${availabilityText} • ${weekLabel}</p>
                 <p class="mb-0">${item.price}</p>
               </div>
               <div class="d-flex gap-2 flex-wrap">
@@ -1073,9 +1139,9 @@
               </div>
             </div>
           </div>
-        `,
-      )
-      .join("");
+        `;
+        },
+      )      .join("");
 
     document.querySelectorAll(".edit-menu-item-btn").forEach((button) => {
       button.addEventListener("click", (event) => {
@@ -1129,6 +1195,11 @@
         dom.menuImagePreview.classList.add("d-none");
       }
       dom.menuDescription.value = item.description;
+      setAvailabilityCheckboxes(item.availability);
+      const weekGroupSelect = document.getElementById("menu-week-group");
+      if (weekGroupSelect) {
+        weekGroupSelect.value = item.weekGroup || "both";
+      }
     } else {
       dom.menuName.value = "";
       dom.menuCategory.value = "starters";
@@ -1137,6 +1208,11 @@
       dom.menuImageFile.value = "";
       dom.menuImagePreview.classList.add("d-none");
       dom.menuDescription.value = "";
+      setAvailabilityCheckboxes([]);
+      const weekGroupSelect = document.getElementById("menu-week-group");
+      if (weekGroupSelect) {
+        weekGroupSelect.value = "both";
+      }
     }
     dom.menuName.focus();
   }
@@ -1157,6 +1233,7 @@
     const imageFile = dom.menuImageFile.files[0];
     const imageUrl = dom.menuImage.value.trim();
     const parsedPrice = parsePrice(price);
+    const availabilityDays = getSelectedAvailabilityDays();
 
     // validate description limits: 20 words and 130 characters
     const rawWords = description
@@ -1184,11 +1261,14 @@
     if (!name || !price || !description || parsedPrice <= 0) return;
     if (!imageFile && !imageUrl) return;
 
+    const weekGroup = document.getElementById("menu-week-group")?.value || "both";
     const formData = new FormData();
     formData.append("name", name);
     formData.append("category", category);
     formData.append("price", formatPrice(parsedPrice));
     formData.append("description", description);
+    formData.append("availability", availabilityDays.join(","));
+    formData.append("weekGroup", weekGroup);
     if (imageFile) {
       formData.append("image", imageFile);
     } else {

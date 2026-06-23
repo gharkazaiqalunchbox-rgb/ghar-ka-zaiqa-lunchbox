@@ -77,9 +77,20 @@ function initializeDatabase() {
       description TEXT,
       price TEXT NOT NULL,
       image TEXT,
+      availability TEXT,
+      weekGroup TEXT,
       createdAt TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // Make sure older databases get the new availability and weekGroup columns
+  const menuInfo = db.prepare("PRAGMA table_info(menu)").all();
+  if (!menuInfo.some((column) => column.name === "availability")) {
+    db.exec("ALTER TABLE menu ADD COLUMN availability TEXT");
+  }
+  if (!menuInfo.some((column) => column.name === "weekGroup")) {
+    db.exec("ALTER TABLE menu ADD COLUMN weekGroup TEXT");
+  }
 
   // Gallery items table
   db.exec(`
@@ -177,10 +188,10 @@ const queries = {
   getMenuById: db.prepare("SELECT * FROM menu WHERE id = ?"),
   getAllMenu: db.prepare("SELECT * FROM menu ORDER BY createdAt DESC"),
   createMenu: db.prepare(
-    "INSERT INTO menu (id, category, name, description, price, image) VALUES (?, ?, ?, ?, ?, ?)",
+    "INSERT INTO menu (id, category, name, description, price, image, availability, weekGroup) VALUES (?,?,?,?,?,?,?,?)",
   ),
   updateMenu: db.prepare(
-    "UPDATE menu SET category = ?, name = ?, description = ?, price = ?, image = ? WHERE id = ?",
+    "UPDATE menu SET category = ?, name = ?, description = ?, price = ?, image = ?, availability = ?, weekGroup = ? WHERE id = ?",
   ),
   deleteMenu: db.prepare("DELETE FROM menu WHERE id = ?"),
 
