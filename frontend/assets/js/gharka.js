@@ -772,10 +772,15 @@
   function setAvailabilityCheckboxes(days) {
     const selected = Array.isArray(days)
       ? days
-      : String(days || "").split(",").map((value) => value.trim()).filter(Boolean);
-    document.querySelectorAll(".menu-availability-checkbox").forEach((input) => {
-      input.checked = selected.includes(input.value);
-    });
+      : String(days || "")
+          .split(",")
+          .map((value) => value.trim())
+          .filter(Boolean);
+    document
+      .querySelectorAll(".menu-availability-checkbox")
+      .forEach((input) => {
+        input.checked = selected.includes(input.value);
+      });
   }
 
   function getCurrentWeekGroup() {
@@ -1113,17 +1118,18 @@
     }
 
     dom.menuAdminList.innerHTML = menuItems
-      .map(
-        (item) => {
-          const availabilityText = item.availability && item.availability.trim()
+      .map((item) => {
+        const availabilityText =
+          item.availability && item.availability.trim()
             ? `Days: ${item.availability}`
             : "Every day";
-          const weekLabel = item.weekGroup === "1st"
+        const weekLabel =
+          item.weekGroup === "1st"
             ? "1st Week"
             : item.weekGroup === "2nd"
-            ? "2nd Week"
-            : "Every Week";
-          return `
+              ? "2nd Week"
+              : "Every Week";
+        return `
           <div class="admin-list-item">
             <div class="d-flex justify-content-between align-items-start gap-3">
               <div>
@@ -1140,8 +1146,8 @@
             </div>
           </div>
         `;
-        },
-      )      .join("");
+      })
+      .join("");
 
     document.querySelectorAll(".edit-menu-item-btn").forEach((button) => {
       button.addEventListener("click", (event) => {
@@ -1261,7 +1267,8 @@
     if (!name || !price || !description || parsedPrice <= 0) return;
     if (!imageFile && !imageUrl) return;
 
-    const weekGroup = document.getElementById("menu-week-group")?.value || "both";
+    const weekGroup =
+      document.getElementById("menu-week-group")?.value || "both";
     const formData = new FormData();
     formData.append("name", name);
     formData.append("category", category);
