@@ -529,6 +529,17 @@
           >
             <li class="nav-item">
               <a
+                class="nav-link active show"
+                data-bs-toggle="tab"
+                data-bs-target="#menu-all-items"
+              >
+                <h4>All Items</h4>
+              </a>
+            </li>
+            <!-- End tab nav item -->
+
+            <li class="nav-item">
+              <a
                 class="nav-link"
                 data-bs-toggle="tab"
                 data-bs-target="#menu-full-meal"
@@ -540,7 +551,7 @@
 
             <li class="nav-item">
               <a
-                class="nav-link active show"
+                class="nav-link"
                 data-bs-toggle="tab"
                 data-bs-target="#menu-individual-items"
               >
@@ -562,6 +573,15 @@
           </ul>
 
           <div class="tab-content" data-aos="fade-up" data-aos-delay="200">
+            <div class="tab-pane fade active show" id="menu-all-items">
+              <div class="tab-header text-center">
+                <p>Menu</p>
+                <h3>All Items</h3>
+              </div>
+              <div class="row gy-5" id="menu-all-items-row"></div>
+            </div>
+            <!-- End All Items Menu Content -->
+
             <div class="tab-pane fade" id="menu-full-meal">
               <div class="tab-header text-center">
                 <p>Menu</p>
@@ -571,7 +591,7 @@
             </div>
             <!-- End Full Meals Menu Content -->
 
-            <div class="tab-pane fade active show" id="menu-individual-items">
+            <div class="tab-pane fade" id="menu-individual-items">
               <div class="tab-header text-center">
                 <p>Menu</p>
                 <h3>Individual Items</h3>

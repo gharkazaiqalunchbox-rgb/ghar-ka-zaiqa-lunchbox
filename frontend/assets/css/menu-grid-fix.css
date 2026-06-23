@@ -272,6 +272,57 @@
   overflow: hidden;
 }
 
+.menu .tab-content .menu-item .add-to-cart-btn.btn-outline-danger {
+  border-color: #dc3545;
+  background: transparent;
+  color: #dc3545;
+}
+
+.menu .tab-content .menu-item .add-to-cart-btn.btn-outline-danger .btn-label {
+  color: #dc3545;
+}
+
+.menu .tab-content .menu-item .add-to-cart-btn.btn-outline-danger::before,
+.menu .tab-content .menu-item .add-to-cart-btn.btn-outline-danger::after {
+  background: transparent;
+}
+
+.menu .tab-content .menu-item .add-to-cart-btn.btn-outline-danger.disabled,
+.menu
+  .tab-content
+  .menu-item
+  .add-to-cart-btn.btn-outline-danger.disabled:hover {
+  background: transparent !important;
+  border-color: #dc3545 !important;
+  color: #dc3545 !important;
+}
+
+.menu
+  .tab-content
+  .menu-item
+  .add-to-cart-btn.btn-outline-danger.disabled
+  .btn-label,
+.menu
+  .tab-content
+  .menu-item
+  .add-to-cart-btn.btn-outline-danger.disabled:hover
+  .btn-label {
+  color: #dc3545 !important;
+  background: none !important;
+  clip-path: none !important;
+}
+
+.menu
+  .tab-content
+  .menu-item
+  .add-to-cart-btn.btn-outline-danger.disabled::before,
+.menu
+  .tab-content
+  .menu-item
+  .add-to-cart-btn.btn-outline-danger.disabled::after {
+  display: none !important;
+}
+
 .menu .tab-content .menu-item .add-to-cart-btn .btn-label {
   position: relative;
   z-index: 3;

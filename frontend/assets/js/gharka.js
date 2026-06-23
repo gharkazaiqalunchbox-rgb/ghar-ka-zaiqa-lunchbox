@@ -795,9 +795,43 @@
     return String(item.weekGroup) === getCurrentWeekGroup();
   }
 
+  function renderMenuCard(item, isAvailable) {
+    const buttonClass = isAvailable
+      ? "btn btn-sm btn-outline-success add-to-cart-btn"
+      : "btn btn-sm btn-outline-danger add-to-cart-btn disabled";
+    const buttonText = isAvailable ? "Add to Cart" : "Unavailable Today";
+    const buttonAttrs = isAvailable ? "" : "disabled";
+
+    return `
+      <div class="col-12 col-sm-6 col-md-4 col-lg-4 menu-item">
+        <a href="${resolveImageUrl(item.image)}" class="glightbox" data-gallery="images-gallery">
+          <img src="${resolveImageUrl(item.image)}" class="menu-img img-fluid" alt="${item.name}" />
+        </a>
+        <h4>${item.name}</h4>
+        <p class="ingredients">${item.description}</p>
+        <p class="price">${formatPrice(item.price)}</p>
+        <button type="button" class="${buttonClass}" data-id="${item.id}" data-img="${resolveImageUrl(item.image)}" ${buttonAttrs}>
+          <span class="btn-label">${buttonText}</span>
+        </button>
+      </div>
+    `;
+  }
+
   function renderMenu() {
     const today = getCurrentDayCode();
     const currentWeek = getCurrentWeekGroup();
+
+    const allItemsRow = document.getElementById("menu-all-items-row");
+    if (allItemsRow) {
+      allItemsRow.innerHTML = menuItems
+        .map((item) => {
+          const isAvailable =
+            isMenuItemAvailableToday(item) && isMenuItemAvailableInWeek(item);
+          return renderMenuCard(item, isAvailable);
+        })
+        .join("");
+    }
+
     ["full-meal", "individual-items", "add-ons"].forEach((category) => {
       const row = document.getElementById(`menu-${category}-row`);
       if (!row) return;
@@ -811,21 +845,7 @@
         row.innerHTML = `<div class="col-12 text-center"><p class="text-muted">No items available in this category for ${today} (${currentWeek} Week).</p></div>`;
         return;
       }
-      row.innerHTML = list
-        .map(
-          (item) => `
-          <div class="col-12 col-sm-6 col-md-4 col-lg-4 menu-item">
-              <a href="${resolveImageUrl(item.image)}" class="glightbox" data-gallery="images-gallery">
-              <img src="${resolveImageUrl(item.image)}" class="menu-img img-fluid" alt="${item.name}" />
-            </a>
-            <h4>${item.name}</h4>
-            <p class="ingredients">${item.description}</p>
-            <p class="price">${formatPrice(item.price)}</p>
-            <button type="button" class="btn btn-sm btn-outline-success add-to-cart-btn" data-id="${item.id}" data-img="${resolveImageUrl(item.image)}"><span class="btn-label">Add to Cart</span></button>
-          </div>
-        `,
-        )
-        .join("");
+      row.innerHTML = list.map((item) => renderMenuCard(item, true)).join("");
     });
   }
 
