@@ -186,6 +186,7 @@
     menuImageFile: document.getElementById("menu-image-file"),
     menuImagePreview: document.getElementById("menu-image-preview"),
     menuDescription: document.getElementById("menu-description"),
+    menuDescriptionHelp: document.getElementById("menu-description-help"),
     menuCancelBtn: document.getElementById("menu-cancel-btn"),
     galleryAdminList: document.getElementById("gallery-admin-list"),
     addGalleryButton: document.getElementById("add-gallery-image-btn"),
@@ -703,6 +704,16 @@
     dom.menuImageFile.value = "";
     dom.menuImagePreview.classList.add("d-none");
     dom.menuDescription.value = "";
+    setAvailabilityCheckboxes([]);
+    const weekGroupSelect = document.getElementById("menu-week-group");
+    if (weekGroupSelect) {
+      weekGroupSelect.value = "both";
+    }
+    if (dom.menuDescriptionHelp) {
+      dom.menuDescriptionHelp.textContent = "0/20 words • 0/130 chars";
+      dom.menuDescriptionHelp.classList.remove("text-danger", "text-warning");
+      dom.menuDescriptionHelp.classList.add("text-muted");
+    }
     editingMenuId = null;
   }
 
@@ -735,26 +746,82 @@
     return menuItems.find((item) => item.id === id);
   }
 
+  const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  function getCurrentDayCode() {
+    return new Date().toLocaleDateString("en-US", { weekday: "short" });
+  }
+
+  function isMenuItemAvailableToday(item) {
+    if (!item || !item.availability) return true;
+    const today = getCurrentDayCode();
+    const availability = String(item.availability)
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean);
+    if (!availability.length) return true;
+    return availability.includes(today);
+  }
+
+  function getSelectedAvailabilityDays() {
+    return Array.from(document.querySelectorAll(".menu-availability-checkbox"))
+      .filter((input) => input.checked)
+      .map((input) => input.value);
+  }
+
+  function setAvailabilityCheckboxes(days) {
+    const selected = Array.isArray(days)
+      ? days
+      : String(days || "")
+          .split(",")
+          .map((value) => value.trim())
+          .filter(Boolean);
+    document
+      .querySelectorAll(".menu-availability-checkbox")
+      .forEach((input) => {
+        input.checked = selected.includes(input.value);
+      });
+  }
+
+  function getCurrentWeekGroup() {
+    const date = new Date();
+    const dayOfMonth = date.getDate();
+    const weekNumber = Math.ceil(dayOfMonth / 7);
+    return weekNumber % 2 === 1 ? "1st" : "2nd";
+  }
+
+  function isMenuItemAvailableInWeek(item) {
+    if (!item || !item.weekGroup || item.weekGroup === "both") return true;
+    return String(item.weekGroup) === getCurrentWeekGroup();
+  }
+
   function renderMenu() {
+    const today = getCurrentDayCode();
+    const currentWeek = getCurrentWeekGroup();
     ["full-meal", "individual-items", "add-ons"].forEach((category) => {
       const row = document.getElementById(`menu-${category}-row`);
       if (!row) return;
-      const list = menuItems.filter((item) => item.category === category);
+      const list = menuItems.filter(
+        (item) =>
+          item.category === category &&
+          isMenuItemAvailableToday(item) &&
+          isMenuItemAvailableInWeek(item),
+      );
       if (!list.length) {
-        row.innerHTML = `<div class="col-12 text-center"><p class="text-muted">No items available in this category yet.</p></div>`;
+        row.innerHTML = `<div class="col-12 text-center"><p class="text-muted">No items available in this category for ${today} (${currentWeek} Week).</p></div>`;
         return;
       }
       row.innerHTML = list
         .map(
           (item) => `
-          <div class="col-lg-4 menu-item">
+          <div class="col-12 col-sm-6 col-md-4 col-lg-4 menu-item">
               <a href="${resolveImageUrl(item.image)}" class="glightbox" data-gallery="images-gallery">
               <img src="${resolveImageUrl(item.image)}" class="menu-img img-fluid" alt="${item.name}" />
             </a>
             <h4>${item.name}</h4>
             <p class="ingredients">${item.description}</p>
             <p class="price">${formatPrice(item.price)}</p>
-            <button type="button" class="btn btn-sm btn-outline-success add-to-cart-btn" data-id="${item.id}" data-img="${resolveImageUrl(item.image)}">Add to Cart</button>
+            <button type="button" class="btn btn-sm btn-outline-success add-to-cart-btn" data-id="${item.id}" data-img="${resolveImageUrl(item.image)}"><span class="btn-label">Add to Cart</span></button>
           </div>
         `,
         )
@@ -868,6 +935,34 @@
         bootstrap.Modal.getOrCreateInstance(cartModal).show();
       }
     }
+  });
+
+  document.addEventListener("pointerdown", (event) => {
+    if (event.pointerType !== "touch") return;
+    const menuItem = event.target.closest(".menu-item");
+    if (!menuItem) return;
+
+    const addBtn = menuItem.querySelector(".add-to-cart-btn");
+    const label = menuItem.querySelector(".btn-label");
+
+    menuItem.classList.remove("touch-active");
+    if (addBtn) addBtn.classList.remove("touch-active");
+    if (label) label.classList.remove("touch-active");
+
+    // Force reflow to restart animations
+    void menuItem.offsetWidth;
+    if (addBtn) void addBtn.offsetWidth;
+    if (label) void label.offsetWidth;
+
+    menuItem.classList.add("touch-active");
+    if (addBtn) addBtn.classList.add("touch-active");
+    if (label) label.classList.add("touch-active");
+
+    window.setTimeout(() => {
+      menuItem.classList.remove("touch-active");
+      if (addBtn) addBtn.classList.remove("touch-active");
+      if (label) label.classList.remove("touch-active");
+    }, 1800);
   });
 
   function addToCart(itemId, buttonElement = null) {
@@ -1023,14 +1118,25 @@
     }
 
     dom.menuAdminList.innerHTML = menuItems
-      .map(
-        (item) => `
+      .map((item) => {
+        const availabilityText =
+          item.availability && item.availability.trim()
+            ? `Days: ${item.availability}`
+            : "Every day";
+        const weekLabel =
+          item.weekGroup === "1st"
+            ? "1st Week"
+            : item.weekGroup === "2nd"
+              ? "2nd Week"
+              : "Every Week";
+        return `
           <div class="admin-list-item">
             <div class="d-flex justify-content-between align-items-start gap-3">
               <div>
                 <strong>${item.name}</strong>
                 <span class="text-muted">(${item.category})</span>
                 <p class="mb-1">${item.description}</p>
+                <p class="mb-1 text-muted small">${availabilityText} • ${weekLabel}</p>
                 <p class="mb-0">${item.price}</p>
               </div>
               <div class="d-flex gap-2 flex-wrap">
@@ -1039,8 +1145,8 @@
               </div>
             </div>
           </div>
-        `,
-      )
+        `;
+      })
       .join("");
 
     document.querySelectorAll(".edit-menu-item-btn").forEach((button) => {
@@ -1095,6 +1201,11 @@
         dom.menuImagePreview.classList.add("d-none");
       }
       dom.menuDescription.value = item.description;
+      setAvailabilityCheckboxes(item.availability);
+      const weekGroupSelect = document.getElementById("menu-week-group");
+      if (weekGroupSelect) {
+        weekGroupSelect.value = item.weekGroup || "both";
+      }
     } else {
       dom.menuName.value = "";
       dom.menuCategory.value = "starters";
@@ -1103,8 +1214,20 @@
       dom.menuImageFile.value = "";
       dom.menuImagePreview.classList.add("d-none");
       dom.menuDescription.value = "";
+      setAvailabilityCheckboxes([]);
+      const weekGroupSelect = document.getElementById("menu-week-group");
+      if (weekGroupSelect) {
+        weekGroupSelect.value = "both";
+      }
     }
     dom.menuName.focus();
+  }
+
+  function trimWords(text, maxWords) {
+    if (!text) return "";
+    const words = text.trim().split(/\s+/).filter(Boolean);
+    if (words.length <= maxWords) return words.join(" ");
+    return words.slice(0, maxWords).join(" ");
   }
 
   async function saveMenuForm(event) {
@@ -1112,19 +1235,47 @@
     const name = dom.menuName.value.trim();
     const category = dom.menuCategory.value;
     const price = dom.menuPrice.value.trim();
-    const description = dom.menuDescription.value.trim();
+    let description = dom.menuDescription.value.trim();
     const imageFile = dom.menuImageFile.files[0];
     const imageUrl = dom.menuImage.value.trim();
     const parsedPrice = parsePrice(price);
+    const availabilityDays = getSelectedAvailabilityDays();
+
+    // validate description limits: 20 words and 130 characters
+    const rawWords = description
+      ? description.split(/\s+/).filter(Boolean)
+      : [];
+    const chars = description.length;
+    if (rawWords.length > 20 || chars > 130) {
+      if (dom.menuDescriptionHelp) {
+        dom.menuDescriptionHelp.textContent = `${rawWords.length}/20 words • ${chars}/130 chars`;
+        dom.menuDescriptionHelp.classList.remove("text-muted");
+        dom.menuDescriptionHelp.classList.add("text-danger");
+      }
+      showToast(
+        "Description must be 20 words or fewer and 130 characters or fewer.",
+        true,
+      );
+      return;
+    }
+    if (dom.menuDescriptionHelp) {
+      dom.menuDescriptionHelp.textContent = `${rawWords.length}/20 words • ${chars}/130 chars`;
+      dom.menuDescriptionHelp.classList.remove("text-danger");
+      dom.menuDescriptionHelp.classList.add("text-muted");
+    }
 
     if (!name || !price || !description || parsedPrice <= 0) return;
     if (!imageFile && !imageUrl) return;
 
+    const weekGroup =
+      document.getElementById("menu-week-group")?.value || "both";
     const formData = new FormData();
     formData.append("name", name);
     formData.append("category", category);
     formData.append("price", formatPrice(parsedPrice));
     formData.append("description", description);
+    formData.append("availability", availabilityDays.join(","));
+    formData.append("weekGroup", weekGroup);
     if (imageFile) {
       formData.append("image", imageFile);
     } else {
@@ -1945,6 +2096,21 @@
     }
     if (dom.menuForm) {
       dom.menuForm.addEventListener("submit", saveMenuForm);
+      if (dom.menuDescription && dom.menuDescriptionHelp) {
+        dom.menuDescription.addEventListener("input", (e) => {
+          const val = e.target.value || "";
+          const words = val.trim().split(/\s+/).filter(Boolean);
+          const chars = val.length;
+          dom.menuDescriptionHelp.textContent = `${words.length}/20 words • ${chars}/130 chars`;
+          if (words.length > 20 || chars > 130) {
+            dom.menuDescriptionHelp.classList.remove("text-muted");
+            dom.menuDescriptionHelp.classList.add("text-danger");
+          } else {
+            dom.menuDescriptionHelp.classList.remove("text-danger");
+            dom.menuDescriptionHelp.classList.add("text-muted");
+          }
+        });
+      }
     }
     if (dom.addGalleryButton) {
       dom.addGalleryButton.addEventListener("click", () => openGalleryForm());

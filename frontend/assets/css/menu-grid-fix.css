@@ -1,56 +1,437 @@
 /* Menu Item Grid Layout Fix */
+.menu .tab-content .row {
+  gap: 2rem;
+  align-items: stretch;
+  justify-content: center;
+}
+
 .menu .tab-content .menu-item {
-  display: grid;
-  grid-template-rows: auto auto 1fr auto auto;
-  gap: 12px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
   text-align: center;
-  min-height: 600px;
-  align-items: start;
+  min-height: 520px;
+  padding: 32px 26px 88px;
+  background: #ffffff;
+  height: 100%;
+  border: 1px solid rgba(47, 125, 54, 0.14);
+  border-radius: 34px;
+  box-shadow: 0 22px 55px rgba(47, 125, 54, 0.08);
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    border-color 0.35s ease,
+    background 0.35s ease;
+  overflow: hidden;
+}
+
+.menu .tab-content .menu-item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 160%;
+  height: 78%;
+  background: radial-gradient(
+    circle at top center,
+    rgba(178, 230, 173, 0.35),
+    transparent 55%
+  );
+  opacity: 0.45;
+  filter: blur(26px);
+  pointer-events: none;
+}
+
+.menu .tab-content .menu-item:hover {
+  transform: translateY(-12px);
+  border-color: rgba(47, 125, 54, 0.28);
+  box-shadow: 0 30px 80px rgba(47, 125, 54, 0.16);
+}
+
+.menu .tab-content .menu-item a.glightbox {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  z-index: 1;
+}
+
+.menu .tab-content .menu-item .menu-img {
+  width: 210px;
+  height: 210px;
+  object-fit: cover;
+  border-radius: 50%;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 10px solid rgba(247, 250, 247, 0.9);
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
+  z-index: 1;
+}
+
+.menu .tab-content .menu-item:hover .menu-img {
+  transform: scale(1.05);
+  box-shadow: 0 22px 42px rgba(47, 125, 54, 0.16);
 }
 
 .menu .tab-content .menu-item h4 {
   font-size: 24px;
-  font-weight: 400;
+  font-weight: 600;
   margin: 0 !important;
   font-family: var(--default-font);
+  color: #1f4321;
+  z-index: 1;
+}
+
+.menu .tab-content .menu-item .price {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(46, 120, 53, 0.08);
+  color: #1f582e;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 !important;
+  transition:
+    color 0.35s ease,
+    background 0.35s ease;
+  z-index: 1;
 }
 
 .menu .tab-content .menu-item .ingredients {
+  position: relative;
+  z-index: 1;
+  opacity: 0;
+  transform: translateY(20px);
+  visibility: hidden;
+  transition:
+    opacity 0.35s ease 0.08s,
+    transform 0.35s ease 0.08s,
+    visibility 0.35s ease 0.08s;
   font-family: var(--nav-font);
-  color: color-mix(in srgb, var(--default-color), transparent 50%);
+  color: color-mix(in srgb, var(--default-color), transparent 55%);
   margin: 0 !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  grid-row: 3;
-  align-self: center;
-}
-
-.menu .tab-content .menu-item .price {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--accent-color);
-  margin: 0 !important;
-  grid-row: 4;
+  width: 100%;
+  padding: 0 18px;
+  line-height: 1.75;
 }
 
 .menu .tab-content .menu-item .add-to-cart-btn {
-  width: 100%;
-  max-width: 200px;
-  justify-self: center;
-  grid-row: 5;
-  align-self: end;
+  position: absolute;
+  left: 26px;
+  right: 26px;
+  bottom: 22px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(18px);
+  transition:
+    opacity 0.35s ease 0.12s,
+    transform 0.35s ease 0.12s,
+    visibility 0.35s ease 0.12s;
+  width: auto;
+  min-width: calc(100% - 52px);
+  max-width: calc(100% - 52px);
+  padding: 14px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+  background: transparent;
+  font-weight: 600;
+  z-index: 1;
 }
 
-.menu .tab-content .menu-item a.glightbox {
-  grid-row: 1;
+.menu .tab-content .menu-item:hover .ingredients,
+.menu .tab-content .menu-item:hover .add-to-cart-btn {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
-.menu .tab-content .menu-item .menu-img {
-  margin: 0 !important;
+.menu .tab-content .menu-item:hover .price {
+  color: #245f25;
+  background: rgba(46, 123, 54, 0.14);
+}
+
+.menu .tab-content .menu-item:hover {
+  background: #f8fff3;
+}
+
+@media (min-width: 992px) {
+  .menu .tab-content .menu-item {
+    flex: 0 0 calc(33.333% - 1.34rem);
+    max-width: calc(33.333% - 1.34rem);
+  }
+}
+
+@media (max-width: 992px) {
+  .menu .tab-content .row {
+    gap: 1.6rem;
+    justify-content: center;
+  }
+
+  .menu .tab-content .menu-item {
+    flex: 0 0 calc(50% - 0.8rem);
+    max-width: calc(50% - 0.8rem);
+    min-height: 520px;
+    padding: 24px 20px 110px;
+  }
+
+  .menu .tab-content .menu-item .menu-img {
+    width: 190px;
+    height: 190px;
+  }
+
+  .menu .tab-content .menu-item .add-to-cart-btn {
+    left: 20px;
+    right: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .menu .tab-content .row {
+    gap: 1.4rem;
+  }
+
+  .menu .tab-content .menu-item {
+    flex: 0 0 calc(100% - 1.4rem);
+    max-width: calc(100% - 1.4rem);
+    padding: 22px 18px 110px;
+  }
+
+  .menu .tab-content .menu-item .menu-img {
+    width: 160px;
+    height: 160px;
+  }
+
+  .menu .tab-content .menu-item .add-to-cart-btn {
+    left: 18px;
+    right: 18px;
+    bottom: 18px;
+  }
+}
+
+/* On touch devices / small screens, show button and label by default (no hover) */
+@media (hover: none), (max-width: 992px) {
+  .menu .tab-content .menu-item .ingredients,
+  .menu .tab-content .menu-item .add-to-cart-btn {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+  .menu .tab-content .menu-item .add-to-cart-btn .btn-label {
+    opacity: 1 !important;
+    color: var(--accent-color) !important;
+    animation: none !important;
+    background: none !important;
+    clip-path: inset(0 0% 0 0) !important;
+    -webkit-text-fill-color: var(--accent-color) !important;
+  }
+  .menu .tab-content .menu-item.touch-active .add-to-cart-btn .btn-label,
+  .menu .tab-content .menu-item .add-to-cart-btn .btn-label.touch-active {
+    animation: label-reveal 1.6s cubic-bezier(0.22, 0.9, 0.35, 1) 0.05s forwards !important;
+    opacity: 1 !important;
+    clip-path: inset(0 0% 0 0) !important;
+  }
 }
 
 /* Flying Item Animation */
+
+/* Add-to-cart Button Animations */
+.menu .tab-content .menu-item .add-to-cart-btn {
+  position: absolute;
+  left: 26px;
+  right: 26px;
+  bottom: 22px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(18px);
+  transition:
+    opacity 0.35s ease 0.12s,
+    transform 0.35s ease 0.12s,
+    visibility 0.35s ease 0.12s,
+    color 0.18s linear 0.28s;
+  width: auto;
+  min-width: calc(100% - 52px);
+  max-width: calc(100% - 52px);
+  padding: 12px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+  background: transparent;
+  font-weight: 600;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.menu .tab-content .menu-item .add-to-cart-btn .btn-label {
+  position: relative;
+  z-index: 3;
+  color: var(--accent-color);
+  opacity: 0;
+  clip-path: inset(0 100% 0 0);
+}
+
+.menu .tab-content .menu-item .add-to-cart-btn::before,
+.menu .tab-content .menu-item .add-to-cart-btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* sliding fill: used when button appears on card hover */
+.menu .tab-content .menu-item .add-to-cart-btn::before {
+  /* narrow bright streak for lens-flare effect - sweep using viewport-based translate to avoid getting stuck */
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(46, 120, 53, 0.98) 45%,
+    rgba(46, 120, 53, 0.98) 55%,
+    transparent 100%
+  );
+  width: 28%;
+  left: -40%;
+  transform: none;
+  filter: blur(6px) saturate(1.1);
+  opacity: 0.98;
+  transition: left 1.6s cubic-bezier(0.22, 0.9, 0.35, 1);
+  transition-delay: 0.12s;
+}
+
+/* center-expand fill: used when user hovers the button itself */
+.menu .tab-content .menu-item .add-to-cart-btn::after {
+  background: var(--accent-color);
+  transform: scaleX(0);
+  transform-origin: center;
+}
+
+/* touch flash sweep animation */
+@keyframes flash-sweep {
+  0% {
+    left: -40%;
+  }
+  100% {
+    left: 140%;
+  }
+}
+
+/* slide-in flash animation when the card is hovered (lens-flare style) */
+.keyframes-dummy {
+}
+@keyframes slide-in-out {
+  0% {
+    transform: translateX(-200%);
+  }
+  45% {
+    transform: translateX(-20%);
+  }
+  55% {
+    transform: translateX(20%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+/* label reveal timed to the flash pass: text reveals character by character */
+.keyframes-dummy {
+}
+@keyframes label-reveal {
+  0% {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+  }
+  15% {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+  }
+  50% {
+    opacity: 1;
+    clip-path: inset(0 0% 0 0);
+  }
+  85% {
+    opacity: 1;
+    clip-path: inset(0 0% 0 0);
+  }
+  100% {
+    opacity: 1;
+    clip-path: inset(0 0% 0 0);
+  }
+}
+
+/* when card shows the button, reveal the button and trigger a quick flash animation */
+.menu .tab-content .menu-item:hover .add-to-cart-btn,
+.menu .tab-content .menu-item.touch-active .add-to-cart-btn {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.menu .tab-content .menu-item:hover .add-to-cart-btn::before {
+  /* move the streak from left outside to right outside using left property */
+  left: 140%;
+}
+
+.menu .tab-content .menu-item.touch-active .add-to-cart-btn::before {
+  animation: flash-sweep 1.6s cubic-bezier(0.22, 0.9, 0.35, 1) 0.12s forwards;
+}
+
+/* animate text reveal gradient to match flash movement */
+.menu .tab-content .menu-item:hover .add-to-cart-btn .btn-label,
+.menu .tab-content .menu-item.touch-active .add-to-cart-btn .btn-label,
+.menu .tab-content .menu-item .add-to-cart-btn .btn-label.touch-active {
+  animation: label-reveal 1.6s cubic-bezier(0.22, 0.9, 0.35, 1) 0.05s forwards;
+}
+
+/* button hover: center expand takes precedence and fills the button from center */
+.menu .tab-content .menu-item .add-to-cart-btn:hover::after {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: scaleX(1);
+}
+
+/* when hovering the button itself, make the label switch to white quickly */
+.menu .tab-content .menu-item .add-to-cart-btn:hover {
+  color: #ffffff;
+  transition: color 0.2s linear 0.1s;
+}
+
+/* when hovering the button itself, show label immediately with white color and visible background */
+.menu .tab-content .menu-item .add-to-cart-btn:hover .btn-label {
+  animation: none !important;
+  opacity: 1 !important;
+  background: none !important;
+  clip-path: inset(0 0% 0 0) !important;
+  -webkit-text-fill-color: #ffffff !important;
+  color: #ffffff !important;
+}
+
+/* ensure the sliding layer and center layer keep the label readable */
+.menu .tab-content .menu-item .add-to-cart-btn {
+  transition: opacity 0.35s ease 0.12s;
+}
+
+/* on smaller screens adjust positions */
+@media (max-width: 992px) {
+  .menu .tab-content .menu-item .add-to-cart-btn {
+    left: 20px;
+    right: 20px;
+    bottom: 18px;
+  }
+}
+
 @keyframes flyToCart {
   0% {
     opacity: 1;

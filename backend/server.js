@@ -271,6 +271,8 @@ app.get("/api/menu", (req, res) => {
       description: row.description,
       price: row.price,
       image: row.image,
+      availability: row.availability || "",
+      weekGroup: row.weekGroup || "both",
     }));
     res.json(menu);
   } catch (error) {
@@ -366,6 +368,10 @@ app.post("/api/menu", authorize, uploadMenu.single("image"), (req, res) => {
     const imagePath = req.file
       ? `assets/img/menu/${req.file.filename}`
       : item.image;
+    const availability = Array.isArray(item.availability)
+      ? item.availability.join(",")
+      : String(item.availability || "");
+    const weekGroup = String(item.weekGroup || "both");
     const newItem = {
       id: `menu-${Date.now()}`,
       category: item.category,
@@ -373,6 +379,8 @@ app.post("/api/menu", authorize, uploadMenu.single("image"), (req, res) => {
       description: item.description,
       price: item.price,
       image: imagePath,
+      availability,
+      weekGroup,
     };
     queries.createMenu.run(
       newItem.id,
@@ -381,6 +389,8 @@ app.post("/api/menu", authorize, uploadMenu.single("image"), (req, res) => {
       newItem.description,
       newItem.price,
       newItem.image,
+      newItem.availability,
+      newItem.weekGroup,
     );
     res.status(201).json(newItem);
   } catch (error) {
@@ -403,6 +413,11 @@ app.put("/api/menu/:id", authorize, uploadMenu.single("image"), (req, res) => {
       ? `assets/img/menu/${req.file.filename}`
       : update.image || oldItem.image;
 
+    const availability = Array.isArray(update.availability)
+      ? update.availability.join(",")
+      : String(update.availability || oldItem.availability || "");
+    const weekGroup = String(update.weekGroup || oldItem.weekGroup || "both");
+
     // Delete old image if a new file is being uploaded and old image exists
     if (req.file && oldItem.image && !oldItem.image.startsWith("http")) {
       const oldImagePath = path.join(frontendDir, oldItem.image);
@@ -415,6 +430,8 @@ app.put("/api/menu/:id", authorize, uploadMenu.single("image"), (req, res) => {
       update.description || oldItem.description,
       update.price || oldItem.price,
       imagePath,
+      availability,
+      weekGroup,
       id,
     );
 
@@ -426,6 +443,8 @@ app.put("/api/menu/:id", authorize, uploadMenu.single("image"), (req, res) => {
       description: updated.description,
       price: updated.price,
       image: updated.image,
+      availability: updated.availability || "",
+      weekGroup: updated.weekGroup || "both",
     });
   } catch (error) {
     console.error("Error updating menu item:", error);

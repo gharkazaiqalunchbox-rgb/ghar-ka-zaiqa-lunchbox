@@ -230,6 +230,79 @@
       </section>
       <!-- /Special Offers Section -->
 
+      <!-- Weekly Menu Section -->
+      <section id="weekly-menu" class="weekly-menu section light-background">
+        <div class="container">
+          <div class="section-title" data-aos="fade-up">
+            <h2>Weekly Lunch Plan</h2>
+            <p>
+              <span>Fresh Menu</span>
+              <span class="description-title">Weekly Plan</span>
+            </p>
+          </div>
+
+          <div class="weekly-menu-card" data-aos="fade-up" data-aos-delay="100">
+            <div
+              class="weekly-menu-header d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3 mb-4"
+            >
+              <div>
+                <h3>PKR 400 / Meal</h3>
+                <p>
+                  Enjoy fresh home-style meals all week with our curated lunch
+                  plan.
+                </p>
+              </div>
+              <div class="weekly-menu-badge">6 Meals / Week</div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="weekly-plan-table">
+                <thead>
+                  <tr>
+                    <th>Day</th>
+                    <th>1st Week</th>
+                    <th>2nd Week</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Mon</td>
+                    <td>White Karahi + Salad + 2 Roti</td>
+                    <td>Achari Chicken + Raita + Salad + 2 Roti</td>
+                  </tr>
+                  <tr>
+                    <td>Tue</td>
+                    <td>Biryani + Raita + Salad</td>
+                    <td>Biryani + Raita + Salad</td>
+                  </tr>
+                  <tr>
+                    <td>Wed</td>
+                    <td>Kadhi Pakora + Dahi Bhallay + 2 Roti</td>
+                    <td>Safaid Chanay + Russian Salad + 2 Roti</td>
+                  </tr>
+                  <tr>
+                    <td>Thu</td>
+                    <td>Vegetable + Raita + Salad + 2 Roti</td>
+                    <td>BBQ Chicken + Raita + Salad + 2 Roti</td>
+                  </tr>
+                  <tr>
+                    <td>Fri</td>
+                    <td>Beef Nihari + Salad + 2 Roti</td>
+                    <td>Chicken (Karahi / Qorma) + Salad + 2 Roti</td>
+                  </tr>
+                  <tr>
+                    <td>Sat</td>
+                    <td>Egg Fried Rice + Shashlik, Manchurian</td>
+                    <td>Vegetable Pulao + Raita + Salad</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- /Weekly Menu Section -->
+
       <!-- About Section -->
       <section id="about" class="about section">
         <!-- Section Title -->
@@ -921,6 +994,114 @@
                             placeholder="Description"
                             required
                           ></textarea>
+                          <small
+                            id="menu-description-help"
+                            class="form-text text-muted"
+                            >0/20 words • 0/130 chars</small
+                          >
+                        </div>
+                        <div class="col-md-12">
+                          <label class="form-label fw-bold"
+                            >Available Days</label
+                          >
+                          <div class="d-flex flex-wrap gap-2">
+                            <div class="form-check">
+                              <input
+                                class="form-check-input menu-availability-checkbox"
+                                type="checkbox"
+                                id="availability-mon"
+                                value="Mon"
+                              />
+                              <label
+                                class="form-check-label"
+                                for="availability-mon"
+                                >Mon</label
+                              >
+                            </div>
+                            <div class="form-check">
+                              <input
+                                class="form-check-input menu-availability-checkbox"
+                                type="checkbox"
+                                id="availability-tue"
+                                value="Tue"
+                              />
+                              <label
+                                class="form-check-label"
+                                for="availability-tue"
+                                >Tue</label
+                              >
+                            </div>
+                            <div class="form-check">
+                              <input
+                                class="form-check-input menu-availability-checkbox"
+                                type="checkbox"
+                                id="availability-wed"
+                                value="Wed"
+                              />
+                              <label
+                                class="form-check-label"
+                                for="availability-wed"
+                                >Wed</label
+                              >
+                            </div>
+                            <div class="form-check">
+                              <input
+                                class="form-check-input menu-availability-checkbox"
+                                type="checkbox"
+                                id="availability-thu"
+                                value="Thu"
+                              />
+                              <label
+                                class="form-check-label"
+                                for="availability-thu"
+                                >Thu</label
+                              >
+                            </div>
+                            <div class="form-check">
+                              <input
+                                class="form-check-input menu-availability-checkbox"
+                                type="checkbox"
+                                id="availability-fri"
+                                value="Fri"
+                              />
+                              <label
+                                class="form-check-label"
+                                for="availability-fri"
+                                >Fri</label
+                              >
+                            </div>
+                            <div class="form-check">
+                              <input
+                                class="form-check-input menu-availability-checkbox"
+                                type="checkbox"
+                                id="availability-sat"
+                                value="Sat"
+                              />
+                              <label
+                                class="form-check-label"
+                                for="availability-sat"
+                                >Sat</label
+                              >
+                            </div>
+                          </div>
+                          <small class="text-muted"
+                            >Leave unchecked to make this item available every
+                            day.</small
+                          >
+                        </div>
+                        <div class="col-md-12">
+                          <label class="form-label fw-bold"
+                            >Week Schedule</label
+                          >
+                          <select id="menu-week-group" class="form-control">
+                            <option value="both">Every Week</option>
+                            <option value="1st">1st Week Only</option>
+                            <option value="2nd">2nd Week Only</option>
+                          </select>
+                          <small class="text-muted"
+                            >Choose whether this item is active on 1st week, 2nd
+                            week, or both.</small
+                          >
                         </div>
                         <div
                           class="col-md-12 d-flex justify-content-end align-items-center gap-2 flex-wrap"
