@@ -117,10 +117,14 @@
   font-family: var(--nav-font);
   color: color-mix(in srgb, var(--default-color), transparent 55%);
   margin: 0 !important;
-  display: flex;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
   align-items: center;
   justify-content: center;
   width: 100%;
+  min-height: calc(1.75em * 3);
   padding: 0 18px;
   line-height: 1.75;
 }

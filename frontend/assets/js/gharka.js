@@ -824,7 +824,20 @@
 
     const allItemsRow = document.getElementById("menu-all-items-row");
     if (allItemsRow) {
-      allItemsRow.innerHTML = menuItems
+      const categoryOrder = {
+        "full-meal": 0,
+        "individual-items": 1,
+        "add-ons": 2,
+      };
+
+      const allItems = [...menuItems].sort((a, b) => {
+        const categoryDiff =
+          (categoryOrder[a.category] ?? 99) - (categoryOrder[b.category] ?? 99);
+        if (categoryDiff !== 0) return categoryDiff;
+        return (a.name || "").localeCompare(b.name || "");
+      });
+
+      allItemsRow.innerHTML = allItems
         .map((item) => {
           const isAvailable =
             isMenuItemAvailableToday(item) && isMenuItemAvailableInWeek(item);
