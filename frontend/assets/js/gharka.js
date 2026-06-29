@@ -787,7 +787,8 @@
     const date = new Date();
     const dayOfMonth = date.getDate();
     const weekNumber = Math.ceil(dayOfMonth / 7);
-    return weekNumber % 2 === 1 ? "1st" : "2nd";
+    // Swap parity so current displayed week matches the site’s weekly plan mapping
+    return weekNumber % 2 === 1 ? "2nd" : "1st";
   }
 
   function isMenuItemAvailableInWeek(item) {
