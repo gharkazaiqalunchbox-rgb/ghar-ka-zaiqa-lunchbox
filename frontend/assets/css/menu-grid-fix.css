@@ -185,7 +185,8 @@
   .menu .tab-content .menu-item {
     flex: 0 0 calc(50% - 0.8rem);
     max-width: calc(50% - 0.8rem);
-    min-height: 520px;
+    min-height: auto;
+    height: auto;
     padding: 24px 20px 110px;
   }
 
@@ -231,13 +232,24 @@
     visibility: visible !important;
     transform: none !important;
   }
-  .menu .tab-content .menu-item .add-to-cart-btn .btn-label {
+  .menu
+    .tab-content
+    .menu-item
+    .add-to-cart-btn:not(.btn-outline-danger)
+    .btn-label {
     opacity: 1 !important;
     color: var(--accent-color) !important;
     animation: none !important;
     background: none !important;
     clip-path: inset(0 0% 0 0) !important;
     -webkit-text-fill-color: var(--accent-color) !important;
+  }
+  .menu .tab-content .menu-item .add-to-cart-btn.btn-outline-danger .btn-label {
+    color: #dc3545 !important;
+    -webkit-text-fill-color: #dc3545 !important;
+    background: none !important;
+    clip-path: inset(0 0% 0 0) !important;
+    opacity: 1 !important;
   }
   .menu .tab-content .menu-item.touch-active .add-to-cart-btn .btn-label,
   .menu .tab-content .menu-item .add-to-cart-btn .btn-label.touch-active {

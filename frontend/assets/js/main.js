@@ -9,9 +9,15 @@
 (function () {
   "use strict";
 
+  if ("scrollRestoration" in history) {
+    history.scrollRestoration = "manual";
+  }
+
   /**
    * Apply .scrolled class to the body as the page is scrolled down
    */
+  let lastScrollY = null;
+
   function toggleScrolled() {
     const selectBody = document.querySelector("body");
     const selectHeader = document.querySelector("#header");
@@ -21,9 +27,32 @@
       !selectHeader.classList.contains("fixed-top")
     )
       return;
-    window.scrollY > 100
-      ? selectBody.classList.add("scrolled")
-      : selectBody.classList.remove("scrolled");
+
+    const currentY = window.scrollY;
+    if (lastScrollY === null) {
+      lastScrollY = currentY;
+      return;
+    }
+
+    const stretchThreshold = 60;
+    const popThreshold = 140;
+    const scrollingDown = currentY > lastScrollY;
+    const hasPop = selectBody.classList.contains("header-pop");
+
+    if (currentY > popThreshold) {
+      selectBody.classList.add("scrolled", "header-pop");
+      selectBody.classList.remove("header-stretch");
+    } else if (currentY > stretchThreshold && scrollingDown) {
+      selectBody.classList.add("header-stretch");
+      selectBody.classList.remove("scrolled", "header-pop");
+    } else if (currentY > stretchThreshold && !scrollingDown && hasPop) {
+      selectBody.classList.add("scrolled", "header-pop");
+      selectBody.classList.remove("header-stretch");
+    } else {
+      selectBody.classList.remove("scrolled", "header-pop", "header-stretch");
+    }
+
+    lastScrollY = currentY;
   }
 
   document.addEventListener("scroll", toggleScrolled);
@@ -109,6 +138,55 @@
     });
   }
   window.addEventListener("load", aosInit);
+
+  function observeSectionTitles() {
+    const titles = document.querySelectorAll(".section-title");
+    if (!titles.length || !window.IntersectionObserver) return;
+
+    const observer = new IntersectionObserver(
+      (entries, observerInstance) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("in-view");
+          observerInstance.unobserve(entry.target);
+        });
+      },
+      {
+        threshold: 0.35,
+        rootMargin: "0px 0px -10% 0px",
+      },
+    );
+
+    titles.forEach((title) => observer.observe(title));
+  }
+
+  window.addEventListener("load", observeSectionTitles);
+
+  function observeAboutTicks() {
+    const aboutSection = document.querySelector("#about");
+    const aboutContent = document.querySelector(".about .content");
+    if (!aboutSection || !aboutContent || !window.IntersectionObserver) return;
+
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+
+          // Start continuous pulsing when the section comes into view
+          aboutContent.querySelectorAll("ul li i").forEach((icon) => {
+            icon.classList.add("ticks-pulse");
+          });
+
+          obs.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.35, rootMargin: "0px 0px -10% 0px" },
+    );
+
+    observer.observe(aboutSection);
+  }
+
+  window.addEventListener("load", observeAboutTicks);
 
   /**
    * Initiate glightbox

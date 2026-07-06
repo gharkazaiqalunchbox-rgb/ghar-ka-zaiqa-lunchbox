@@ -21,7 +21,7 @@
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Amatic+SC:wght@400;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap"
       rel="stylesheet"
     />
 
@@ -113,8 +113,12 @@
             <div
               class="col-lg-6 order-2 order-lg-1 d-flex flex-column justify-content-center"
             >
-              <h1 data-aos="fade-up">
-                Fresh home-style lunchboxes<br />delivered daily
+              <h1 data-aos="fade-up" class="hero-title">
+                <span class="hero-title-line">Fresh home-style</span>
+                <span class="hero-title-line hero-title-accent"
+                  >lunchboxes</span
+                >
+                <span class="hero-title-line">delivered daily</span>
               </h1>
               <p data-aos="fade-up" data-aos-delay="100">
                 Homemade food made with care. Taste of home, always. We prepare
@@ -156,8 +160,8 @@
           <div class="section-title" data-aos="fade-up">
             <h2>Special Offers</h2>
             <p>
-              <span>Save More</span>
-              <span class="description-title">Weekly Lunchbox Deals</span>
+              <span>Great Meals</span>
+              <span class="description-title">Better Value</span>
             </p>
           </div>
 
@@ -236,8 +240,8 @@
           <div class="section-title" data-aos="fade-up">
             <h2>Weekly Lunch Plan</h2>
             <p>
-              <span>Fresh Menu</span>
-              <span class="description-title">Weekly Plan</span>
+              <span>Your Week</span>
+              <span class="description-title">Planned Perfectly</span>
             </p>
           </div>
 
@@ -277,8 +281,8 @@
                   </tr>
                   <tr>
                     <td>Wed</td>
-                    <td>Kadhi Pakora + Dahi Bhallay + 2 Roti</td>
-                    <td>Safaid Chanay + Russian Salad + 2 Roti</td>
+                    <td>Makhni Channay + Dahi Bhallay + 2 Roti</td>
+                    <td>Kari Pakora + Russian Salad + 2 Roti</td>
                   </tr>
                   <tr>
                     <td>Thu</td>
@@ -293,7 +297,7 @@
                   <tr>
                     <td>Sat</td>
                     <td>Egg Fried Rice + Shashlik, Manchurian</td>
-                    <td>Vegetable Pulao + Raita + Salad</td>
+                    <td>Egg Fried Rice + Shashlik, Manchurian</td>
                   </tr>
                 </tbody>
               </table>
@@ -309,8 +313,8 @@
         <div class="container section-title" data-aos="fade-up">
           <h2>About Us<br /></h2>
           <p>
-            <span>Learn More</span>
-            <span class="description-title">About Us</span>
+            <span>The Story</span>
+            <span class="description-title">Behind Every Meal</span>
           </p>
         </div>
         <!-- End Section Title -->
@@ -318,14 +322,53 @@
         <div class="container">
           <div class="row gy-4">
             <div class="col-lg-7" data-aos="fade-up" data-aos-delay="100">
-              <img
-                src="assets/img/about.png"
-                class="img-fluid mb-4"
-                alt="Home cooked meal"
-              />
-              <div class="book-a-table">
-                <h3>Order Now</h3>
-                <p>03035698404</p>
+              <div class="about-visual">
+                <div
+                  class="about-image-card"
+                  data-aos="zoom-in"
+                  data-aos-delay="120"
+                >
+                  <img
+                    src="assets/img/about.png"
+                    class="img-fluid"
+                    alt="Home cooked meal"
+                  />
+                  <span class="about-image-label">
+                    <i class="bi bi-shield-check"></i>
+                    Family Trusted
+                  </span>
+                </div>
+                <div
+                  class="about-cta-card"
+                  data-aos="fade-up"
+                  data-aos-delay="180"
+                >
+                  <div class="about-cta-head">
+                    <h3>Trusted <span>Home-Style Meals</span></h3>
+                    <p>
+                      Crafted for families who value freshness, warmth, and the
+                      comfort of homemade cooking every day.
+                    </p>
+                  </div>
+                  <div class="about-cta-pill-row">
+                    <span class="feature-pill">
+                      <i class="bi bi-fire"></i>
+                      Hot & Fresh
+                    </span>
+                    <span class="feature-pill">
+                      <i class="bi bi-heart-pulse-fill"></i>
+                      Made with Care
+                    </span>
+                    <span class="feature-pill">
+                      <i class="bi bi-award-fill"></i>
+                      Family Approved
+                    </span>
+                  </div>
+                  <div class="about-cta-note">
+                    <i class="bi bi-emoji-smile"></i>
+                    Served with love and balanced nutrition.
+                  </div>
+                </div>
               </div>
             </div>
             <div class="col-lg-5" data-aos="fade-up" data-aos-delay="250">
@@ -337,21 +380,63 @@
                 </p>
                 <ul>
                   <li>
-                    <i class="bi bi-check-circle-fill"></i>
+                    <i class="tick-icon" aria-hidden="true">
+                      <svg
+                        viewBox="0 0 16 16"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                        focusable="false"
+                      >
+                        <path
+                          fill="currentColor"
+                          stroke="currentColor"
+                          stroke-width="0.9"
+                          d="M13.485 3.929a.75.75 0 010 1.06L6.53 11.946a.75.75 0 01-1.06 0L2.515 8.99a.75.75 0 011.06-1.06l2.19 2.19 6.762-6.762a.75.75 0 011.058 0z"
+                        />
+                      </svg>
+                    </i>
                     <span
                       >Fresh home-cooked meals made daily in a hygienic
                       kitchen.</span
                     >
                   </li>
                   <li>
-                    <i class="bi bi-check-circle-fill"></i>
+                    <i class="tick-icon" aria-hidden="true">
+                      <svg
+                        viewBox="0 0 16 16"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                        focusable="false"
+                      >
+                        <path
+                          fill="currentColor"
+                          stroke="currentColor"
+                          stroke-width="1.5"
+                          d="M13.485 3.929a.75.75 0 010 1.06L6.53 11.946a.75.75 0 01-1.06 0L2.515 8.99a.75.75 0 011.06-1.06l2.19 2.19 6.762-6.762a.75.75 0 011.058 0z"
+                        />
+                      </svg>
+                    </i>
                     <span
                       >Balanced nutrition in every dish, crafted for real family
                       tastes.</span
                     >
                   </li>
                   <li>
-                    <i class="bi bi-check-circle-fill"></i>
+                    <i class="tick-icon" aria-hidden="true">
+                      <svg
+                        viewBox="0 0 16 16"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                        focusable="false"
+                      >
+                        <path
+                          fill="currentColor"
+                          stroke="currentColor"
+                          stroke-width="1.5"
+                          d="M13.485 3.929a.75.75 0 010 1.06L6.53 11.946a.75.75 0 01-1.06 0L2.515 8.99a.75.75 0 011.06-1.06l2.19 2.19 6.762-6.762a.75.75 0 011.058 0z"
+                        />
+                      </svg>
+                    </i>
                     <span
                       >Delivered warm and ready, so you can enjoy a comforting
                       meal at home.</span
@@ -515,8 +600,8 @@
         <div class="container section-title" data-aos="fade-up">
           <h2>Our Menu</h2>
           <p>
-            <span>Fresh Daily</span>
-            <span class="description-title">Home-Cooked Meals</span>
+            <span>The Week</span>
+            <span class="description-title">Served Fresh</span>
           </p>
         </div>
         <!-- End Section Title -->
@@ -658,8 +743,8 @@
         <div class="container section-title" data-aos="fade-up">
           <h2>Gallery</h2>
           <p>
-            <span>Browse Our</span>
-            <span class="description-title">Home-Cooked Meals</span>
+            <span>A Feast</span>
+            <span class="description-title">for the Eyes</span>
           </p>
         </div>
         <!-- End Section Title -->
@@ -1227,8 +1312,8 @@
         <div class="container section-title" data-aos="fade-up">
           <h2>Contact Us</h2>
           <p>
-            <span>Need help with your order?</span>
-            <span class="description-title">We're here to support you</span>
+            <span>We're Just</span>
+            <span class="description-title">a Text Away</span>
           </p>
         </div>
         <!-- End Section Title -->
@@ -1308,8 +1393,8 @@
           <div class="container section-title" data-aos="fade-up">
             <h2>Share Your Experience</h2>
             <p>
-              <span>Leave a Review</span>
-              <span class="description-title">Help us Improve</span>
+              <span>Help Us</span>
+              <span class="description-title">Serve You Better</span>
             </p>
           </div>
           <!-- End Section Title -->
