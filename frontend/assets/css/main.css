@@ -1542,26 +1542,50 @@ section,
 
 .hero .btn-watch-video {
   font-size: 16px;
-  transition: 0.5s;
-  margin-left: 25px;
-  color: var(--default-color);
+  transition: 0.3s ease;
+  margin-left: 20px;
+  color: var(--accent-color);
   font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 50px;
+  border: 1px solid var(--accent-color);
+  background: transparent;
+  min-height: 46px;
+  text-decoration: none;
 }
 
 .hero .btn-watch-video i {
   color: var(--accent-color);
-  font-size: 32px;
-  transition: 0.3s;
+  font-size: 18px;
+  transition: 0.3s ease;
   line-height: 0;
   margin-right: 8px;
 }
 
 .hero .btn-watch-video:hover {
   color: var(--accent-color);
+  background: rgba(47, 125, 54, 0.08);
+  text-decoration: none;
 }
 
 .hero .btn-watch-video:hover i {
-  color: color-mix(in srgb, var(--accent-color), transparent 15%);
+  color: var(--accent-color);
+}
+
+@media (max-width: 767px) {
+  .hero .btn-watch-video {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hero .btn-getstarted {
+    width: 100%;
+  }
+
+  .hero .d-flex.gap-3.flex-wrap {
+    justify-content: center;
+  }
 }
 
 .hero .animated {
