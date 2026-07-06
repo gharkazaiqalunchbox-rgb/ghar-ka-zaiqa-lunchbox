@@ -299,6 +299,41 @@ h6 {
     margin: 0 auto;
   }
 
+  /* Prevent the toast container from blocking header buttons on small screens.
+   Inline styles set z-index:9999; override on small viewports so header
+   controls remain clickable. */
+  @media (max-width: 768px) {
+    #toast-container {
+      /* Keep toast under header and non-interactive by default on small screens */
+      z-index: 990 !important;
+      pointer-events: none !important;
+    }
+
+    /* When JS marks the container active, bring it above header and allow interaction */
+    #toast-container.toast-active {
+      z-index: 9999 !important;
+      pointer-events: auto !important;
+    }
+  }
+
+  /* Make toast full-width under header on small screens */
+  @media (max-width: 768px) {
+    #toast-container {
+      left: 0 !important;
+      right: 0 !important;
+      width: 100% !important;
+      max-width: none !important;
+      padding: 0 12px !important;
+      box-sizing: border-box !important;
+    }
+
+    #toast-container .toast {
+      width: 100% !important;
+      max-width: none !important;
+      border-radius: 12px !important;
+      margin: 0 auto !important;
+    }
+  }
   .header .btn-getstarted.admin-button {
     order: 1;
     margin: 0;
@@ -426,21 +461,30 @@ h6 {
 .scrolled .header {
   box-shadow: 0 20px 56px rgba(45, 58, 35, 0.14);
   background-color: rgba(246, 238, 220, 0.82);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 22px;
   top: 12px;
   width: calc(100% - 3rem);
   margin: 0 auto;
-  transform: translateY(0) scaleX(0.99);
+  /* Remove transform to avoid creating a stacking context that confines fixed children */
+  transform: none;
+}
+
+/* Apply blur only on large screens to avoid creating a containing block
+   that confines fixed-position children on mobile */
+@media (min-width: 1200px) {
+  .scrolled .header {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
 }
 
 body.header-stretch .header {
   top: 0;
   width: 100%;
   margin: 0;
-  transform: translateY(0) scaleX(1.01);
+  /* Keep visual position but avoid transform stacking context */
+  transform: none;
   box-shadow: 0 10px 32px rgba(45, 58, 35, 0.12);
   border-radius: 0 0 24px 24px;
 }
@@ -449,7 +493,8 @@ body.header-pop .header {
   top: 18px;
   width: calc(100% - 2rem);
   margin: 0 auto;
-  transform: translateY(4px) scaleX(1.002);
+  /* Avoid transform so fixed-position elements (mobile nav) are not contained */
+  transform: none;
   border-radius: 24px;
   box-shadow: 0 18px 50px rgba(45, 58, 35, 0.18);
 }
@@ -660,7 +705,8 @@ body.header-pop .header {
 
   .navmenu {
     padding: 0;
-    z-index: 9997;
+    /* Keep nav under header buttons when inactive on small screens */
+    z-index: 995;
   }
 
   .navmenu ul {
@@ -676,7 +722,8 @@ body.header-pop .header {
     box-shadow: none;
     overflow-y: auto;
     transition: 0.3s;
-    z-index: 9998;
+    /* Keep hidden menu under header buttons until explicitly opened */
+    z-index: 995;
   }
 
   .navmenu a,
@@ -799,10 +846,14 @@ body.header-pop .header {
     inset: 0;
     background: rgba(33, 37, 41, 0.8);
     transition: 0.3s;
+    /* Ensure overlay appears above header when active */
+    z-index: 9998;
   }
 
   .mobile-nav-active .navmenu > ul {
     display: block;
+    /* Ensure active menu list overlays header/buttons */
+    z-index: 9999;
   }
 }
 

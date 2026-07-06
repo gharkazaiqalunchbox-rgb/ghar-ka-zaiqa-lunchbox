@@ -1623,6 +1623,18 @@
       toastBody.style.color = "#155724";
     }
 
+    // Position toast below header on small screens.
+    const toastContainer = document.getElementById("toast-container");
+    if (toastContainer) {
+      // compute header height if present, fallback to 72px
+      const header = document.getElementById("header");
+      const headerHeight = header ? header.getBoundingClientRect().height : 72;
+      // set top so toast appears just below header
+      toastContainer.style.top = `${Math.ceil(headerHeight + 8)}px`;
+      // mark container active so it sits above header and receives pointer events
+      toastContainer.classList.add("toast-active");
+    }
+
     // Ensure it's visible, then animate slide/fade in via class
     toastElement.style.display = "block";
     // allow layout then add class
@@ -1636,6 +1648,12 @@
       // hide after transition (matching CSS 320ms)
       setTimeout(() => {
         toastElement.style.display = "none";
+        // remove active state so it doesn't block header buttons
+        if (toastContainer) {
+          toastContainer.classList.remove("toast-active");
+          // clear inline top so responsive CSS can manage it again
+          toastContainer.style.top = "";
+        }
       }, 340);
     }, duration);
   }
@@ -1654,6 +1672,9 @@
     const btn = e.target.closest("#toast-notification .btn-close");
     if (btn) {
       e.preventDefault();
+      // also remove active class from container when manually closed
+      const toastContainer = document.getElementById("toast-container");
+      if (toastContainer) toastContainer.classList.remove("toast-active");
       hideToast();
     }
   });
