@@ -1902,6 +1902,7 @@ section,
   position: absolute;
   left: 50%;
   top: 50%;
+  transform: translate(-50%, -50%);
   width: 28px;
   height: 28px;
   background: rgba(47, 125, 54, 0.18);
@@ -1994,6 +1995,11 @@ section,
     width: 28px;
     height: 28px;
     font-size: 14px;
+  }
+  .about .content ul i::before,
+  .about .content ul i::after {
+    left: 50%;
+    top: 50%;
   }
 }
 
