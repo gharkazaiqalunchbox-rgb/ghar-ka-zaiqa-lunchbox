@@ -784,11 +784,17 @@
   }
 
   function getCurrentWeekGroup() {
-    const date = new Date();
-    const dayOfMonth = date.getDate();
-    const weekNumber = Math.ceil(dayOfMonth / 7);
-    // Alternating week groups: 1st week for days 1–7, 2nd week for days 8–14, etc.
-    return weekNumber % 2 === 1 ? "1st" : "2nd";
+    const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+    const now = new Date();
+    const currentMidnight = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
+    const anchor = new Date(2026, 6, 6); // Known 1st week start date: July 6, 2026
+    const diffWeeks = Math.floor((currentMidnight - anchor) / WEEK_MS);
+    const parity = ((diffWeeks % 2) + 2) % 2;
+    return parity === 0 ? "1st" : "2nd";
   }
 
   function isMenuItemAvailableInWeek(item) {
